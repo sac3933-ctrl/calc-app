@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>공학계산기 연습장 · fx-570ES PLUS</title>
+<meta name="description" content="Casio fx-570ES PLUS 2nd Edition 키 순서를 센서 및 응용 기출·숙제 계산으로 익히는 연습 웹앱">
+<meta name="theme-color" content="#23272d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="계산기연습">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+img{max-width:100%}[hidden]{display:none!important}
+button{touch-action:manipulation}
+/* 태블릿·터치 화면에서는 키를 더 크게 */
+@media (pointer:coarse) and (min-width:761px){
+  main{grid-template-columns:minmax(320px,380px) minmax(0,1fr)!important}
+  .key{height:38px!important;font-size:.82rem!important}
+  .key.n,.key.del{height:44px!important}
+}
+.install{font-size:.8rem;color:var(--muted);margin-top:10px}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: 실물 계산기를 왼쪽에 고정하고, 오른쪽에서 문제·키 순서를 따라가는 "책상 위 연습" 구성 */
+:root{
+  --bg:#eceff2; --panel:#ffffff; --ink:#1a2028; --muted:#5a6572; --line:#d5dbe2;
+  --accent:#985a0a; --accent-soft:#f6ead8; --good:#2c7a4c; --good-soft:#e2f2e8; --bad:#b23a2e; --bad-soft:#f8e3e0;
+  --chip:#eef1f4;
+  --f-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15181c; --panel:#1e2228; --ink:#e8ebef; --muted:#9aa4b0; --line:#323943;
+  --accent:#e9a640; --accent-soft:#3a2c17; --good:#62c48b; --good-soft:#1b3326; --bad:#ef7d70; --bad-soft:#3b1f1c;
+  --chip:#2a3038; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15181c; --panel:#1e2228; --ink:#e8ebef; --muted:#9aa4b0; --line:#323943;
+  --accent:#e9a640; --accent-soft:#3a2c17; --good:#62c48b; --good-soft:#1b3326; --bad:#ef7d70; --bad-soft:#3b1f1c;
+  --chip:#2a3038; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:20px 40px}
+header h1{font-size:1.45rem;margin:0;font-weight:700;text-wrap:balance}
+header p{margin:.25rem 0 0;color:var(--muted);font-size:.92rem}
+main{display:grid;grid-template-columns:minmax(300px,350px) minmax(0,1fr);grid-template-areas:"calc step" "calc list";gap:20px;margin-top:18px;align-items:start}
+#calcWrap{grid-area:calc;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+#stepCard{grid-area:step}
+#listCard{grid-area:list}
+@media (max-width:760px){
+  main{grid-template-columns:minmax(0,1fr);grid-template-areas:"calc" "step" "list";gap:14px}
+  #calcWrap{position:static;justify-self:center;width:100%;max-width:360px}
+}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.eyebrow{font-size:.75rem;letter-spacing:.06em;color:var(--accent);font-weight:700}
+.card h2{margin:.15rem 0 .4rem;font-size:1.2rem;text-wrap:balance}
+.situ{color:var(--ink);margin:0 0 .5rem}
+.formula{font-family:var(--f-mono);background:var(--chip);border-radius:8px;padding:8px 10px;font-size:.9rem;overflow-x:auto;white-space:nowrap}
+.prog{display:none;font-family:var(--f-mono);font-size:.8rem;color:var(--muted);margin-top:12px}
+@media (max-width:760px){.prog{display:block}.step.done,.step.todo{display:none}.steps{margin-top:6px}}
+.chip span sup{font-size:.7em}
+.steps{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.step{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px}
+.step .head{display:flex;gap:10px;align-items:baseline}
+.step .num{font-family:var(--f-mono);font-weight:600;color:var(--muted);flex:none}
+.step.done{background:var(--good-soft);border-color:transparent}
+.step.done .num{color:var(--good)}
+.step.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.step.todo{opacity:.55}
+.step .txt{min-width:0}
+.expect{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--f-mono);font-size:.8rem;background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:2px 7px;line-height:1.35;display:inline-flex;flex-direction:column;align-items:center}
+.chip small{font-size:.62rem;line-height:1}
+.chip.sh{color:#7a5300;background:#f3d47a;border-color:#e2bd4f}
+.chip.al{color:#fff;background:#c9483f;border-color:#b23a2e}
+.chip.sub-sh small{color:var(--accent)}
+.chip.sub-al small{color:var(--bad)}
+.chip.ok{opacity:.4;text-decoration:line-through}
+.chip.nx{outline:2px solid #2f9be0;outline-offset:1px}
+.tip{background:var(--accent-soft);border-radius:8px;padding:8px 10px;font-size:.88rem;margin-top:12px}
+.tip b{color:var(--accent)}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.btn{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--panel);border-color:var(--accent);font-weight:600}
+.btn:focus-visible,.tab:focus-visible,.lesson:focus-visible{outline:2px solid #2f9be0;outline-offset:2px}
+label.tog{display:inline-flex;gap:6px;align-items:center;font-size:.88rem;color:var(--muted);cursor:pointer}
+.banner{margin-top:12px;border-radius:8px;padding:8px 10px;font-size:.9rem;display:none}
+.banner.show{display:block}
+.banner.good{background:var(--good-soft);color:var(--good)}
+.banner.warn{background:var(--bad-soft);color:var(--bad)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.mode{font:inherit;font-size:.85rem;display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:4px 10px;cursor:pointer}
+.mode span{font-family:var(--f-mono);font-size:.75rem}
+.mode.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.mode:focus-visible{outline:2px solid #2f9be0;outline-offset:2px}
+.realhead{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-mono);font-size:.85rem;color:var(--muted);margin-top:10px}
+.timer{font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.goals{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.goals li{display:grid;grid-template-columns:1.4em minmax(0,1fr) auto;gap:8px;align-items:baseline;border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.goals li.got{border-style:solid;border-color:transparent;background:var(--good-soft)}
+.goals .gk{color:var(--muted)} .goals li.got .gk{color:var(--good);font-weight:700}
+.goals .gv{font-family:var(--f-mono);font-size:.85rem;color:var(--good);text-align:right;overflow-wrap:anywhere}
+.fdet{margin-top:10px}
+.cause{margin-top:10px;background:var(--bad-soft);color:var(--ink);border-radius:8px;padding:8px 10px;font-size:.9rem}
+.cause b{color:var(--bad)}
+.mocklist{margin:8px 0 0;padding-left:1.3rem;display:grid;gap:3px}
+.muted{color:var(--muted);font-size:.8rem}
+.tw{overflow-x:auto;margin-top:10px}
+table.rep{border-collapse:collapse;width:100%;font-size:.88rem;min-width:420px}
+table.rep th,table.rep td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;font-variant-numeric:tabular-nums}
+table.rep th{color:var(--muted);font-weight:600;font-size:.8rem}
+table.rep tr.miss td:first-child{color:var(--bad)}
+.btn.sm{font-size:.78rem;padding:2px 8px}
+.lesson .lt{flex:1;min-width:0}
+.lesson .dots{font-size:.7rem;letter-spacing:1px;color:var(--accent);flex:none}
+.tab{font:inherit;font-size:.88rem;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.lesson{font:inherit;text-align:left;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;gap:8px;align-items:baseline;font-size:.9rem}
+.lesson .tag{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);flex:none;min-width:2.6em}
+.lesson.active{border-color:var(--accent);background:var(--accent-soft)}
+.lesson.fin .tag{color:var(--good)}
+details{margin-top:14px;font-size:.9rem}
+details summary{cursor:pointer;font-weight:600}
+details ul{margin:.5rem 0 0;padding-left:1.2rem;display:grid;gap:4px}
+.fine{font-size:.8rem;color:var(--muted);margin-top:12px}
+.prefix{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.prefix span{font-family:var(--f-mono);font-size:.78rem;background:var(--chip);border-radius:5px;padding:1px 6px}
+
+/* ---------- 계산기 본체 (항상 같은 실물 색) ---------- */
+.calc{background:linear-gradient(180deg,#30353d,#23272d);border-radius:22px 22px 30px 30px;padding:16px 14px 20px;box-shadow:0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);color:#e9ecef;user-select:none;-webkit-user-select:none}
+.model{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.68rem;color:#aab2bd;margin:0 4px 8px}
+.lcd{background:#c4ccb6;color:#18200f;border-radius:6px;border:3px solid #1a1d22;box-shadow:inset 0 2px 6px rgba(0,0,0,.25);padding:4px 8px 6px;height:112px;display:grid;grid-template-rows:14px 1fr auto;font-family:var(--f-mono)}
+.ind{display:flex;gap:8px;font-size:.62rem;font-weight:600;letter-spacing:.02em;line-height:14px}
+.ind .off{opacity:0}
+.inp{overflow-x:auto;overflow-y:hidden;white-space:nowrap;font-size:1rem;display:flex;align-items:center;scrollbar-width:none}
+.inp::-webkit-scrollbar{display:none}
+.res{text-align:right;font-size:1.35rem;font-weight:500;white-space:nowrap;overflow:hidden;min-height:1.9rem;display:flex;justify-content:flex-end;align-items:center}
+.res.err{font-size:.95rem;text-align:left;justify-content:flex-start;align-items:flex-start;padding-top:2px}
+.menu{font-size:.82rem;line-height:1.35;white-space:pre}
+.lcd sup{font-size:.68em;vertical-align:.55em;line-height:0}
+.lcd sub{font-size:.68em;vertical-align:-.25em;line-height:0}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;font-size:.82em;line-height:1.05}
+.fr>span{padding:0 2px}
+.fr>span:first-child{border-bottom:1.5px solid currentColor}
+.rt{display:inline-flex;align-items:flex-start}
+.rad{border-top:1.5px solid currentColor;padding:0 2px;margin-top:2px}
+.box{display:inline-block;min-width:.55em;height:.95em;border:1px dashed currentColor;vertical-align:middle;opacity:.7}
+.caret{display:inline-block;width:2px;height:1.05em;background:#18200f;vertical-align:middle;animation:blink 1s steps(1) infinite;margin:0 -1px}
+@keyframes blink{50%{opacity:0}}
+.x10{font-size:.85em}
+.menu.ed{font-size:.74rem;line-height:1.3;width:100%}
+.menu.ed mark{background:#18200f;color:#c4ccb6}
+.edbot{display:block;text-align:right;font-size:.9rem;min-height:1.1em}
+
+.keys{margin-top:14px;display:grid;gap:8px}
+.top{display:grid;grid-template-columns:1fr 1fr 1.45fr 1fr 1fr;grid-template-rows:auto auto;gap:6px 8px;align-items:end}
+.fn{display:grid;grid-template-columns:repeat(6,1fr);gap:6px 6px}
+.nm{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 8px;margin-top:6px}
+.kw{display:flex;flex-direction:column;align-items:stretch;gap:1px;min-width:0}
+.lab{display:flex;justify-content:space-between;font-size:.56rem;line-height:1.1;min-height:.75rem;padding:0 1px;white-space:nowrap;overflow:hidden}
+.lab .s{color:#e9b949}
+.lab .a{color:#ef7a70;margin-left:auto}
+.key{font-family:var(--f-mono);border:none;border-radius:7px;cursor:pointer;color:#f2f4f6;background:#434953;box-shadow:0 2px 0 #15171b;height:28px;font-size:.74rem;padding:0;touch-action:manipulation;position:relative}
+.key:active{transform:translateY(2px);box-shadow:none}
+.key:focus-visible{outline:2px solid #2f9be0;outline-offset:1px}
+.key.shiftk{color:#2a2000;background:#e0b443}
+.key.alphak{background:#c9483f}
+.key.n{background:#e7e8e2;color:#1d1f22;height:36px;font-size:1rem;font-weight:600;box-shadow:0 2px 0 #8d8f8a}
+.key.n.op{font-size:1.15rem}
+.key.del{background:#d8843d;color:#1b1206;height:36px;font-size:.9rem;font-weight:600;box-shadow:0 2px 0 #7d4a1c}
+.key.on{background:#5b616b}
+.key.next{outline:3px solid #36b3ff;outline-offset:2px;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{outline-color:rgba(54,179,255,.25)}}
+@media (prefers-reduced-motion: reduce){.key.next{animation:none}.caret{animation:none}}
+.key.latch{box-shadow:0 0 0 2px #fff inset}
+.pad{grid-column:3;grid-row:1 / span 2;position:relative;aspect-ratio:1;max-width:100%;border-radius:50%;background:#3a3f48;box-shadow:inset 0 0 0 2px #2a2e34, 0 2px 0 #15171b;align-self:center}
+.pad span.r{position:absolute;inset:0;display:grid;place-items:center;font-size:.5rem;color:#9aa3ae;font-family:var(--f-mono);pointer-events:none}
+.pad button{position:absolute;width:34%;height:34%;border:none;background:transparent;color:#e9ecef;cursor:pointer;font-size:.8rem;border-radius:50%}
+.pad button:focus-visible{outline:2px solid #2f9be0}
+.pad button.next{outline:3px solid #36b3ff}
+.pad .u{top:2%;left:33%}.pad .d{bottom:2%;left:33%}.pad .l{left:2%;top:33%}.pad .rr{right:2%;top:33%}
+.mini{display:none}
+@media (max-width:760px) and (max-height:780px){
+  .mini .me{display:none}
+  .key{height:28px!important}
+  .key.n,.key.del{height:36px!important}
+  .lcd{height:94px!important;padding-top:2px}
+  .lab{min-height:.68rem;font-size:.52rem}
+  .res{font-size:1.2rem;min-height:1.6rem}
+  .menu.ed{font-size:.64rem!important;line-height:1.18!important}
+  .edbot{font-size:.78rem!important}
+  .menu{font-size:.72rem;line-height:1.2}
+  .wrap{padding-block:8px 28px!important}
+  header h1{font-size:.95rem!important}
+}
+@media (max-width:760px){
+  .mini{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+  .mini .mh{display:flex;justify-content:space-between;gap:8px;font-size:.78rem;color:var(--accent);font-weight:700}
+  .mini .mh a{color:var(--muted);font-weight:500;text-decoration:none;white-space:nowrap}
+  .mini .mt{font-size:.92rem;line-height:1.4}
+  .mini .me{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+  .mini .chips{gap:4px}
+  .mini .chip{font-size:.72rem;padding:1px 5px}
+  .mini .mm{font-size:.82rem;border-radius:6px;padding:4px 8px}
+  .mini .mm.good{background:var(--good-soft);color:var(--good)}
+  .mini .mm.warn{background:var(--bad-soft);color:var(--bad)}
+  .key{height:32px;font-size:.78rem}
+  header h1{font-size:1.05rem}
+  .model{display:none}
+  .lcd{height:92px}
+  .keys{margin-top:10px;gap:6px}
+  .nm{gap:7px;margin-top:2px}
+  .fn{gap:4px 6px}
+  .mini{gap:4px;padding:8px 10px;margin-bottom:8px}
+  .mini .mt{font-size:.88rem}
+  main{margin-top:10px}
+  .key.n,.key.del{height:40px}
+  .calc{padding:12px 10px 16px}
+  .toast{display:none}
+  .wrap{padding-block:14px 32px}
+  header p{display:none}
+}
+.toast{min-height:2.6em;margin-top:10px;font-size:.84rem;color:var(--muted);text-align:center}
+.toast.warn{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>570ES PLUS 키 연습장</h1>
+    <p>중간고사 기출·HW1·HW2 유형의 계산을 실제 키 순서로 손에 익히는 연습기입니다. 단계에 맞춰 키를 직접 누르세요. 파란 테두리가 다음에 누를 키입니다.</p>
+  </header>
+
+  <main>
+    <section id="calcWrap" aria-label="계산기">
+      <div class="mini" id="mini" aria-live="polite"></div>
+      <div class="calc">
+        <div class="model"><span>fx-570ES PLUS 배열</span><span>NATURAL-V.P.A.M.</span></div>
+        <div class="lcd" id="lcd" aria-live="polite">
+          <div class="ind" id="ind"></div>
+          <div class="inp" id="inp"></div>
+          <div class="res" id="res"></div>
+        </div>
+        <div class="keys" id="keys"></div>
+      </div>
+      <div class="toast" id="toast">키보드 숫자·연산자·Enter·Backspace도 쓸 수 있어요.</div>
+    </section>
+
+    <section id="stepCard" class="card" aria-live="polite"></section>
+
+    <section id="listCard" class="card">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-basic" data-tab="basic">기본 조작</button>
+        <button class="tab" role="tab" id="tab-stat" data-tab="stat">STAT 회귀</button>
+        <button class="tab" role="tab" id="tab-exam" data-tab="exam">기출·숙제 계산</button>
+        <button class="tab" role="tab" id="tab-trouble" data-tab="trouble">사고 복구</button>
+        <button class="tab" role="tab" id="tab-mock" data-tab="mock">모의시험</button>
+      </div>
+      <div class="lessons" id="lessons"></div>
+      <details>
+        <summary>시험장에서 자주 틀리는 다섯 가지</summary>
+        <ul>
+          <li>지수의 마이너스는 <b>(−)</b> 키. 빼기 키 <b>−</b>를 누르면 Syntax ERROR.</li>
+          <li><b>1÷2π</b>는 1/(2π)로 계산됩니다. ES 계열은 곱셈 기호를 생략한 곱(2π, 3A)을 ÷보다 먼저 계산합니다.</li>
+          <li>√□, x<sup>□</sup>, □/□ 같은 틀 안에서 빠져나올 때는 <b>▶</b>. 안 누르면 뒤에 쓴 식까지 틀 안에 들어갑니다.</li>
+          <li>답이 분수나 π로 나오면 <b>S⇔D</b>로 소수 변환. 단위 접두어(m, μ, n)는 <b>ENG</b>.</li>
+          <li>시험 직전 <b>SHIFT 9 3 = AC</b>로 초기화하고 화면 위에 <b>D</b>(Deg)가 보이는지 확인.</li>
+        </ul>
+      </details>
+      <p class="fine">실물 fx-570ES PLUS 2nd Edition의 키 배열과 입력 규칙을 따라 만든 연습기입니다. 문제와 키 순서는 「센서 및 응용 기출·숙제 문제집」의 계산기 입력과 같고, HW2 원본은 제출(10/11) 전이라 유사 문제로만 넣었어요. COMP와 STAT(A+BX) 모드를 지원하고, MATRIX·방정식·다른 회귀 종류는 넣지 않았습니다.</p>
+      <p class="install">홈 화면에 추가하면 앱처럼 열리고, 한 번 연 뒤에는 인터넷 없이도 쓸 수 있어요. iPhone·iPad: Safari 공유 버튼 → 홈 화면에 추가 · Android: Chrome 메뉴 → 홈 화면에 추가. 진도는 각자 기기에만 저장돼요.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ================= 키 정의 ================= */
+const XB = 'x<sup>■</sup>';
+const ROWS_TOP = [
+  {id:'shift',m:'SHIFT',cls:'shiftk'},{id:'alpha',m:'ALPHA',cls:'alphak'},null,{id:'mode',m:'MODE',s:'SETUP'},{id:'on',m:'ON',cls:'on'},
+  {id:'calc',m:'CALC',s:'SOLVE',a:'='},{id:'int',m:'∫□',s:'d/dx'},null,{id:'inv',m:'x⁻¹',s:'x!'},{id:'logab',m:'log<sub>■</sub>□',s:'Σ'}
+];
+const ROWS_FN = [
+  {id:'frac',m:'□/□'},{id:'sqrt',m:'√□',s:'∛□'},{id:'sq',m:'x²',s:'x³'},{id:'pow',m:XB,s:'ˣ√□'},{id:'log',m:'log',s:'10<sup>■</sup>'},{id:'ln',m:'ln',s:'e<sup>■</sup>'},
+  {id:'neg',m:'(−)',a:'A'},{id:'dms',m:'°′″',a:'B'},{id:'hyp',m:'hyp',a:'C'},{id:'sin',m:'sin',s:'sin⁻¹',a:'D'},{id:'cos',m:'cos',s:'cos⁻¹',a:'E'},{id:'tan',m:'tan',s:'tan⁻¹',a:'F'},
+  {id:'rcl',m:'RCL',s:'STO'},{id:'eng',m:'ENG',s:'←'},{id:'lp',m:'('},{id:'rp',m:')',a:'X'},{id:'sd',m:'S⇔D',a:'Y'},{id:'mplus',m:'M+',a:'M'}
+];
+const ROWS_NUM = [
+  {id:'7',m:'7',s:'CONST',cls:'n'},{id:'8',m:'8',s:'CONV',cls:'n'},{id:'9',m:'9',s:'CLR',cls:'n'},{id:'del',m:'DEL',s:'INS',cls:'del'},{id:'ac',m:'AC',s:'OFF',cls:'del'},
+  {id:'4',m:'4',cls:'n'},{id:'5',m:'5',cls:'n'},{id:'6',m:'6',cls:'n'},{id:'mul',m:'×',cls:'n op'},{id:'div',m:'÷',cls:'n op'},
+  {id:'1',m:'1',cls:'n'},{id:'2',m:'2',cls:'n'},{id:'3',m:'3',cls:'n'},{id:'add',m:'+',cls:'n op'},{id:'sub',m:'−',cls:'n op'},
+  {id:'0',m:'0',cls:'n'},{id:'dot',m:'.',cls:'n'},{id:'exp',m:'×10<sup>x</sup>',s:'π',a:'e',cls:'n'},{id:'ans',m:'Ans',cls:'n'},{id:'eq',m:'=',cls:'n op'}
+];
+const KEYDEF = {};
+[...ROWS_TOP,...ROWS_FN,...ROWS_NUM].forEach(k=>{ if(k) KEYDEF[k.id]=k; });
+Object.assign(KEYDEF,{up:{m:'▲'},down:{m:'▼'},left:{m:'◀'},right:{m:'▶'}});
+
+function keyHTML(k){
+  return `<div class="kw"><div class="lab"><span class="s">${k.s||''}</span><span class="a">${k.a||''}</span></div><button class="key ${k.cls||''}" data-k="${k.id}" aria-label="${(k.m||'').replace(/<[^>]+>/g,'')}">${k.m}</button></div>`;
+}
+function buildKeys(){
+  const top = ROWS_TOP.map((k,i)=>{
+    if(k) return keyHTML(k).replace('<div class="kw">',`<div class="kw" style="grid-column:${(i%5)+1};grid-row:${i<5?1:2}">`);
+    if(i===2) return `<div class="pad"><span class="r">REPLAY</span><button class="u" data-k="up" aria-label="위">▲</button><button class="d" data-k="down" aria-label="아래">▼</button><button class="l" data-k="left" aria-label="왼쪽">◀</button><button class="rr" data-k="right" aria-label="오른쪽">▶</button></div>`;
+    return '';
+  }).join('');
+  document.getElementById('keys').innerHTML =
+    `<div class="top">${top}</div><div class="fn">${ROWS_FN.map(keyHTML).join('')}</div><div class="nm">${ROWS_NUM.map(keyHTML).join('')}</div>`;
+  document.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>press(b.dataset.k)));
+}
+
+/* ================= 계산기 상태 ================= */
+const S = {
+  mode:'edit', tokens:[], cur:0, shift:false, alpha:false,
+  setup:{io:'Math', out:'Math', angle:'Deg', disp:'Norm', dn:1},
+  hist:[], hi:-1, calcMode:'COMP', ansFlags:{},
+  stat:{x:[],y:[],row:0,col:0,typ:''},
+  ans:0, ansIrr:false, vars:{A:0,B:0,C:0,D:0,E:0,F:0,X:0,Y:0,M:0},
+  result:null, err:null, menu:null, pending:null, override:null,
+  lastEvent:null, lastStartAns:false, keyCount:0
+};
+const VARKEY = {neg:'A',dms:'B',hyp:'C',sin:'D',cos:'E',tan:'F',rp:'X',sd:'Y',mplus:'M'};
+const SE = 'Syntax ERROR', ME = 'Math ERROR';
+
+function toast(msg, warn){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(warn?' warn':''); }
+
+/* ---- 토큰 / 틀(template) ---- */
+function ins(arr){ S.tokens.splice(S.cur,0,...arr); }
+function insTok(tok){ ins([tok]); S.cur+=1; }
+function insTpl(kind){
+  const n = (kind==='frac'||kind==='logab') ? 2 : 1;
+  const arr=[{t:'tO',kind}]; for(let i=1;i<n;i++) arr.push({t:'tS'}); arr.push({t:'tC'});
+  ins(arr); S.cur+=1;
+}
+function matchTpl(openIdx){
+  const seps=[]; let depth=0;
+  for(let j=openIdx+1;j<S.tokens.length;j++){
+    const t=S.tokens[j].t;
+    if(t==='tO') depth++;
+    else if(t==='tC'){ if(depth===0) return {seps, close:j}; depth--; }
+    else if(t==='tS' && depth===0) seps.push(j);
+  }
+  return {seps, close:S.tokens.length};
+}
+function enclosing(){ // 커서를 감싸는 틀 스택
+  const st=[];
+  for(let i=0;i<S.cur;i++){
+    const t=S.tokens[i].t;
+    if(t==='tO') st.push({open:i, slot:0, kind:S.tokens[i].kind});
+    else if(t==='tS' && st.length) st[st.length-1].slot++;
+    else if(t==='tC') st.pop();
+  }
+  return st;
+}
+function delAtCursor(){
+  if(S.cur===0) return;
+  const t=S.tokens[S.cur-1];
+  if(t.t==='tS'||t.t==='tC'){ S.cur--; return; }
+  if(t.t==='tO'){
+    const m=matchTpl(S.cur-1);
+    [m.close,...m.seps.slice().reverse(),S.cur-1].sort((a,b)=>b-a).forEach(i=>{ if(i<S.tokens.length) S.tokens.splice(i,1); });
+    S.cur--; return;
+  }
+  S.tokens.splice(S.cur-1,1); S.cur--;
+}
+
+/* ---- 트리 ---- */
+function parseSeq(i){
+  const items=[];
+  while(i<S.tokens.length){
+    const tk=S.tokens[i];
+    if(tk.t==='tS'||tk.t==='tC') break;
+    if(tk.t==='tO'){
+      const node={t:'tpl',kind:tk.kind,start:i,slots:[]};
+      i++;
+      let r=parseSeq(i); node.slots.push({items:r.items,start:i,end:r.i}); i=r.i;
+      while(i<S.tokens.length && S.tokens[i].t==='tS'){ i++; r=parseSeq(i); node.slots.push({items:r.items,start:i,end:r.i}); i=r.i; }
+      i++; items.push(node);
+    } else { items.push({t:'tok',tok:tk,idx:i}); i++; }
+  }
+  return {items,i};
+}
+const CUR='<span class="caret"></span>';
+const SVLAB={sx2:'Σx²',sx:'Σx',sy2:'Σy²',sy:'Σy',sxy:'Σxy',sx3:'Σx³',sx2y:'Σx²y',sx4:'Σx⁴',n:'n',mx:'x̄',xsn:'xσn',xsn1:'xσn-1',my:'ȳ',ysn:'yσn',ysn1:'yσn-1',A:'A',B:'B',r:'r',minX:'minX',maxX:'maxX',minY:'minY',maxY:'maxY'};
+const FNLAB={log:'log(',ln:'ln(',sin:'sin(',cos:'cos(',tan:'tan(',asin:'sin⁻¹(',acos:'cos⁻¹(',atan:'tan⁻¹('};
+function tokLabel(t){
+  switch(t.t){
+    case 'd': return t.v;
+    case 'neg': return '<span style="font-size:.85em">-</span>';
+    case 'op': return {'+':'+','-':'−','*':'×','/':'÷'}[t.v];
+    case 'lp': return '('; case 'rp': return ')';
+    case 'fn': return FNLAB[t.v];
+    case 'sq': return '²'; case 'cube': return '³'; case 'inv': return '⁻¹'; case 'fact': return '!';
+    case 'pi': return 'π'; case 'e': return '<i>e</i>'; case 'ans': return 'Ans'; case 'var': return t.v;
+    case 'sv': return SVLAB[t.v]; case 'xhat': return 'x̂'; case 'yhat': return 'ŷ';
+  }
+  return '';
+}
+function renderItems(items,start,end,cur){
+  let h='', inExp=false;
+  const startOf=it=>it.t==='tok'?it.idx:it.start;
+  if(!items.length) return '<span class="box">'+(cur===start?CUR:'')+'</span>';
+  for(const it of items){
+    if(inExp && !(it.t==='tok' && (it.tok.t==='d'||it.tok.t==='neg'))){ h+='</sup>'; inExp=false; }
+    if(cur===startOf(it)) h+=CUR;
+    if(it.t==='tok'){
+      if(it.tok.t==='E'){ h+='<span class="x10">×10</span><sup>'; inExp=true; }
+      else h+=tokLabel(it.tok);
+    } else h+=renderTpl(it,cur);
+  }
+  if(cur===end) h+=CUR;
+  if(inExp) h+='</sup>';
+  return h;
+}
+function renderTpl(n,cur){
+  const s=k=>renderItems(n.slots[k].items,n.slots[k].start,n.slots[k].end,cur);
+  switch(n.kind){
+    case 'frac': return `<span class="fr"><span>${s(0)}</span><span>${s(1)}</span></span>`;
+    case 'sqrt': return `<span class="rt">√<span class="rad">${s(0)}</span></span>`;
+    case 'cbrt': return `<span class="rt"><sup>3</sup>√<span class="rad">${s(0)}</span></span>`;
+    case 'pow': return `<sup>${s(0)}</sup>`;
+    case 'p10': return `10<sup>${s(0)}</sup>`;
+    case 'pexp': return `<i>e</i><sup>${s(0)}</sup>`;
+    case 'logab': return `log<sub>${s(0)}</sub>(${s(1)})`;
+  }
+  return '';
+}
+function renderInput(cur){
+  const tr=parseSeq(0);
+  if(!tr.items.length) return cur>=0?CUR:'';
+  return renderItems(tr.items,0,S.tokens.length,cur);
+}
+
+/* ---- 계산 ---- */
+let FL;
+function evaluate(){
+  FL={irr:false,pi:false,sqrt:false,stat:false};
+  const tr=parseSeq(0);
+  if(!tr.items.length) throw SE;
+  let v=evalItems(tr.items);
+  if(!isFinite(v)||Math.abs(v)>=1e100) throw ME;
+  if(Math.abs(v)<1e-99) v=0;
+  return Number(v.toPrecision(15));
+}
+function evalItems(items){
+  if(!items.length) throw SE;
+  const L=lex(items); let p=0;
+  const peek=()=>L[p], next=()=>L[p++];
+  const isStart=t=>t && (t.k==='num'||t.k==='lp'||t.k==='fn'||(t.k==='tpl'&&t.node.kind!=='pow'));
+  function parseExpr(min){
+    let left=parseUnary();
+    for(;;){
+      const t=peek(); if(!t) break;
+      if(t.k==='op'){
+        const pr=(t.v==='+'||t.v==='-')?1:2; if(pr<min) break; next();
+        const r=parseExpr(pr+0.1);
+        if(t.v==='+') left+=r; else if(t.v==='-') left-=r; else if(t.v==='*') left*=r;
+        else { if(r===0) throw ME; left/=r; }
+      } else if(t.k==='post'){
+        if(5<min) break; next(); left=post(t.v,left);
+      } else if(t.k==='tpl' && t.node.kind==='pow'){
+        if(4<min) break; next(); left=pw(left, evalItems(t.node.slots[0].items));
+      } else if(isStart(t)){
+        if(2.5<min) break; left*=parseExpr(2.6);   // 생략 곱셈: ×÷보다 먼저
+      } else if(t.k==='rp') break;
+      else throw SE;
+    }
+    return left;
+  }
+  function parseUnary(){
+    const t=peek();
+    if(t && t.k==='neg'){ next(); return -parseExpr(4); }
+    if(t && t.k==='op' && (t.v==='-'||t.v==='+') && p===0){ next(); const v=parseExpr(1.1); return t.v==='-'?-v:v; }
+    return parsePrimary();
+  }
+  function group(){ const v=parseExpr(0); if(peek()&&peek().k==='rp') next(); else if(peek()) throw SE; return v; }
+  function parsePrimary(){
+    const t=next(); if(!t) throw SE;
+    if(t.k==='num') return t.v;
+    if(t.k==='lp') return group();
+    if(t.k==='fn'){ FL.irr=true; return fn(t.v, group()); }
+    if(t.k==='tpl') return tpl(t.node);
+    throw SE;
+  }
+  const v=parseExpr(0);
+  if(p<L.length) throw SE;
+  return v;
+}
+function lex(items){
+  const L=[]; let i=0;
+  const isT=(j,type)=>j<items.length && items[j].t==='tok' && items[j].tok.t===type;
+  while(i<items.length){
+    const it=items[i];
+    if(it.t==='tpl'){ L.push({k:'tpl',node:it}); i++; continue; }
+    const tk=it.tok;
+    if(tk.t==='d'||tk.t==='E'){
+      let s='',dot=false;
+      while(isT(i,'d')){ if(items[i].tok.v==='.'){ if(dot) throw SE; dot=true; } s+=items[i].tok.v; i++; }
+      if(isT(i,'E')){
+        i++; if(s==='.') throw SE; if(s==='') s='1';
+        let ex=''; if(isT(i,'neg')){ ex='-'; i++; }
+        let dg=''; while(isT(i,'d') && items[i].tok.v!=='.'){ dg+=items[i].tok.v; i++; }
+        if(!dg) throw SE;
+        s+='e'+ex+dg;
+      }
+      if(s==='.') throw SE;
+      L.push({k:'num',v:parseFloat(s)}); continue;
+    }
+    switch(tk.t){
+      case 'neg': L.push({k:'neg'}); break;
+      case 'op': L.push({k:'op',v:tk.v}); break;
+      case 'lp': L.push({k:'lp'}); break;
+      case 'rp': L.push({k:'rp'}); break;
+      case 'fn': L.push({k:'fn',v:tk.v}); break;
+      case 'sq': case 'cube': case 'inv': case 'fact': L.push({k:'post',v:tk.t}); break;
+      case 'pi': FL.pi=true; L.push({k:'num',v:Math.PI}); break;
+      case 'e': FL.irr=true; L.push({k:'num',v:Math.E}); break;
+      case 'ans': for(const k in S.ansFlags) if(S.ansFlags[k]) FL[k]=true; L.push({k:'num',v:S.ans}); break;
+      case 'var': FL.irr=FL.irr||!isRat(S.vars[tk.v]); L.push({k:'num',v:S.vars[tk.v]}); break;
+      case 'sv': FL.stat=true; L.push({k:'num',v:statVal(tk.v)}); break;
+      case 'xhat': case 'yhat': FL.stat=true; L.push({k:'post',v:tk.t}); break;
+    }
+    i++;
+  }
+  return L;
+}
+function statVal(k){
+  const X=S.stat.x, Y=S.stat.y, n=X.length;
+  if(n===0) throw ME;
+  const sum=f=>X.reduce((a,x,i)=>a+f(x,Y[i]),0);
+  const sx=sum(x=>x), sy=sum((x,y)=>y), sx2=sum(x=>x*x), sy2=sum((x,y)=>y*y), sxy=sum((x,y)=>x*y);
+  const Sxx=n*sx2-sx*sx, Syy=n*sy2-sy*sy, Sxy=n*sxy-sx*sy;
+  const need2=()=>{ if(n<2) throw ME; };
+  switch(k){
+    case 'sx2': return sx2; case 'sx': return sx; case 'sy2': return sy2; case 'sy': return sy; case 'sxy': return sxy;
+    case 'sx3': return sum(x=>x*x*x); case 'sx2y': return sum((x,y)=>x*x*y); case 'sx4': return sum(x=>x**4);
+    case 'n': return n; case 'mx': return sx/n; case 'my': return sy/n;
+    case 'xsn': return Math.sqrt(Math.max(0,Sxx)/(n*n)); case 'ysn': return Math.sqrt(Math.max(0,Syy)/(n*n));
+    case 'xsn1': need2(); return Math.sqrt(Math.max(0,Sxx)/(n*(n-1))); case 'ysn1': need2(); return Math.sqrt(Math.max(0,Syy)/(n*(n-1)));
+    case 'B': need2(); if(Sxx===0) throw ME; return Sxy/Sxx;
+    case 'A': need2(); if(Sxx===0) throw ME; return (sy-(Sxy/Sxx)*sx)/n;
+    case 'r': need2(); if(Sxx===0||Syy===0) throw ME; return Sxy/Math.sqrt(Sxx*Syy);
+    case 'minX': return Math.min(...X); case 'maxX': return Math.max(...X); case 'minY': return Math.min(...Y); case 'maxY': return Math.max(...Y);
+  }
+  throw SE;
+}
+function pw(a,b){ const r=Math.pow(a,b); if(!isFinite(r)||isNaN(r)) throw ME; return r; }
+function post(k,x){
+  if(k==='xhat'){ const B=statVal('B'); if(B===0) throw ME; return (x-statVal('A'))/B; }
+  if(k==='yhat'){ return statVal('A')+statVal('B')*x; }
+  if(k==='sq') return x*x; if(k==='cube') return x*x*x;
+  if(k==='inv'){ if(x===0) throw ME; return 1/x; }
+  if(k==='fact'){ if(x<0||x>69||Math.round(x)!==x) throw ME; let r=1; for(let i=2;i<=x;i++) r*=i; return r; }
+}
+function toRad(x){ return S.setup.angle==='Deg'?x*Math.PI/180:S.setup.angle==='Gra'?x*Math.PI/200:x; }
+function fromRad(x){ return S.setup.angle==='Deg'?x*180/Math.PI:S.setup.angle==='Gra'?x*200/Math.PI:x; }
+function clean(r){ return Math.abs(r)<1e-14?0:r; }
+function fn(f,x){
+  switch(f){
+    case 'log': if(x<=0) throw ME; return Math.log10(x);
+    case 'ln': if(x<=0) throw ME; return Math.log(x);
+    case 'sin': return clean(Math.sin(toRad(x)));
+    case 'cos': return clean(Math.cos(toRad(x)));
+    case 'tan': { const c=Math.cos(toRad(x)); if(Math.abs(c)<1e-14) throw ME; return clean(Math.tan(toRad(x))); }
+    case 'asin': if(Math.abs(x)>1) throw ME; return fromRad(Math.asin(x));
+    case 'acos': if(Math.abs(x)>1) throw ME; return fromRad(Math.acos(x));
+    case 'atan': return fromRad(Math.atan(x));
+  }
+}
+function tpl(n){
+  const s=k=>evalItems(n.slots[k].items);
+  switch(n.kind){
+    case 'frac': { const a=s(0), b=s(1); if(b===0) throw ME; return a/b; }
+    case 'sqrt': { FL.sqrt=true; const x=s(0); if(x<0) throw ME; return Math.sqrt(x); }
+    case 'cbrt': FL.irr=true; return Math.cbrt(s(0));
+    case 'p10': FL.irr=true; return pw(10,s(0));
+    case 'pexp': FL.irr=true; return pw(Math.E,s(0));
+    case 'logab': { FL.irr=true; const b=s(0), x=s(1); if(b<=0||b===1||x<=0) throw ME; return Math.log(x)/Math.log(b); }
+  }
+  throw SE;
+}
+
+/* ---- 표시 ---- */
+function toFrac(x){
+  if(!isFinite(x)) return null;
+  const sg=x<0?-1:1; x=Math.abs(x);
+  let h1=1,h0=0,k1=0,k0=1,b=x;
+  for(let i=0;i<40;i++){
+    const a=Math.floor(b); const h=a*h1+h0, k=a*k1+k0;
+    if(k>1e10) break;
+    h0=h1;h1=h;k0=k1;k1=k;
+    if(Math.abs(x-h1/k1)<=1e-13*Math.max(1e-300,x)) return {n:sg*h1,d:k1};
+    const f=b-a; if(f<1e-15) break; b=1/f;
+  }
+  return null;
+}
+const digits=n=>String(Math.abs(n)).length;
+function isRat(v){ const f=toFrac(v); return !!f; }
+function fracOK(v){ const f=toFrac(v); return f && f.d>1 && digits(f.n)+digits(f.d)<=9 ? f : null; } // 정수·분자·분모·분수선 합계 10자리 이내
+const mn=s=>String(s).replace(/-/g,'−');
+function sci(v,sig,keepZeros){
+  let [m,e]=v.toExponential(sig-1).split('e');
+  if(!keepZeros && m.includes('.')) m=m.replace(/0+$/,'').replace(/\.$/,'');
+  return `${mn(m)}<span class="x10">×10</span><sup>${mn(Number(e))}</sup>`;
+}
+function fmtDec(v){
+  const st=S.setup, a=Math.abs(v);
+  if(v===0) return st.disp==='Fix'?(0).toFixed(st.dn):'0';
+  if(st.disp==='Sci') return sci(v, st.dn||10, true);
+  if(st.disp==='Fix'){ if(a>=1e10) return sci(v,10); return mn(v.toFixed(st.dn)); }
+  const lo = st.dn===2?1e-9:0.01;
+  if(a<lo||a>=1e10) return sci(v,10);
+  const d=Math.min(20,Math.max(0,10-(Math.floor(Math.log10(a))+1)));
+  let s=v.toFixed(d); if(s.includes('.')) s=s.replace(/0+$/,'').replace(/\.$/,'');
+  return mn(s);
+}
+function fmtEng(v,e){
+  let m=v/Math.pow(10,e);
+  let s=String(Number(m.toPrecision(10)));
+  if(s.includes('e')) s=m.toFixed(6);
+  return `${mn(s)}<span class="x10">×10</span><sup>${mn(e)}</sup>`;
+}
+function fmtResult(r){
+  const form=r.forms[r.fi];
+  if(r.eng!=null) return fmtEng(r.v,r.eng);
+  if(form==='frac'){ const f=fracOK(r.v); return (f.n<0?'−':'')+`<span class="fr"><span>${Math.abs(f.n)}</span><span>${f.d}</span></span>`; }
+  if(form==='root'){
+    const q=rootForm(r.v); const top=`${q.c===1?'':q.c}√<span class="rad">${q.k}</span>`;
+    return q.sg+(q.den===1?`<span class="rt">${top}</span>`:`<span class="fr"><span><span class="rt">${top}</span></span><span>${q.den}</span></span>`);
+  }
+  if(form==='pi'){
+    const f=toFrac(r.v/Math.PI); const p=Math.abs(f.n), sg=f.n<0?'−':'';
+    const top=(p===1?'':p)+'π';
+    return f.d===1? sg+top : sg+`<span class="fr"><span>${top}</span><span>${f.d}</span></span>`;
+  }
+  return fmtDec(r.v);
+}
+function gcd(a,b){ while(b){ [a,b]=[b,a%b]; } return a; }
+function rootForm(v){
+  if(v===0) return null;
+  const f=toFrac(v*v); if(!f || f.n<=0) return null;
+  let N=f.n*f.d; if(N>1e12) return null;
+  let sq=1,k=N;
+  for(let i=2;i*i<=k;i++){ while(k%(i*i)===0){ k/=i*i; sq*=i; } }
+  if(k===1) return null;
+  const g=gcd(sq,f.d), c=sq/g, den=f.d/g;
+  if(Math.abs(Math.abs(v)-c*Math.sqrt(k)/den)>1e-9*Math.abs(v)) return null;
+  if(digits(c)+digits(k)+digits(den)>10) return null;
+  return {sg:v<0?'−':'',c,k,den};
+}
+function makeResult(v){
+  const forms=[];
+  if(S.setup.io==='Math' && S.setup.out==='Math' && !FL.stat){
+    if(fracOK(v)) forms.push('frac');
+    else if(FL.sqrt && !FL.pi && !FL.irr && rootForm(v)) forms.push('root');
+    else if(!FL.irr && !FL.sqrt && FL.pi && v!==0){ const f=toFrac(v/Math.PI); if(f && digits(f.n)+digits(f.d)<=8) forms.push('pi'); }
+  }
+  forms.push('dec');
+  return {v,forms,fi:0,eng:null};
+}
+
+/* ================= 키 처리 ================= */
+const CONT_IDS = new Set(['add','sub','mul','div','sq','inv','pow']);
+function startInput(id, force){
+  // 결과가 떠 있는 상태에서 새 입력 시작: 연산자·x²·x□ 등은 Ans에 이어 붙음
+  if(S.mode!=='result') return;
+  const cont = force!==undefined ? force : CONT_IDS.has(id);
+  S.override=null;
+  if(cont){ S.tokens=[{t:'ans'}]; S.cur=1; } else { S.tokens=[]; S.cur=0; }
+  S.mode='edit'; S.result=null;
+}
+function doEval(replay){
+  try{
+    const v=evaluate();
+    if(!replay){ const j=JSON.stringify(S.tokens); if(S.hist[S.hist.length-1]!==j){ S.hist.push(j); if(S.hist.length>30) S.hist.shift(); } S.hi=S.hist.length-1; }
+    S.lastStartAns = S.tokens[0] && S.tokens[0].t==='ans';
+    S.result=makeResult(v); S.ans=v; S.ansFlags={...FL}; S.mode='result'; S.override=null;
+    return true;
+  }catch(e){
+    S.mode='error'; S.err=(e===ME?ME:SE); return false;
+  }
+}
+const unsupported = name => toast(`${name}: 이 연습기에서는 지원하지 않아요. 실물 계산기에서 확인하세요.`, true);
+
+function press(id){
+  S.keyCount++; S.lastEvent=null;
+  guideStep(id);
+  handle(id);
+  render();
+  checkLesson();
+}
+
+function handle(id){
+  if(S.mode==='off'){ if(id==='on'){ S.mode='edit'; S.tokens=[]; S.cur=0; } return; }
+  if(id==='shift'){ S.shift=!S.shift; S.alpha=false; return; }
+  if(id==='alpha'){ S.alpha=!S.alpha; S.shift=false; return; }
+  const sh=S.shift, al=S.alpha; S.shift=false; S.alpha=false;
+  if(id==='on'){ S.mode='edit'; S.tokens=[]; S.cur=0; S.menu=null; S.pending=null; S.result=null; S.override=null; return; }
+
+  if(S.mode==='menu'){ S.menu.onKey(id); return; }
+  if(S.pending){
+    const L=VARKEY[id], kind=S.pending; S.pending=null;
+    if(!L){ toast('변수 키가 아니어서 취소됐어요.'); return; }
+    if(kind==='sto'){
+      let v;
+      if(S.mode==='edit' && S.tokens.length){ if(!doEval()) return; v=S.result.v; }
+      else if(S.mode==='result') v=S.result.v; else v=S.ans;
+      S.vars[L]=v; S.ans=v; S.ansFlags={};
+      S.result=makeResult(v); FL={irr:!isRat(v),pi:false}; S.result=makeResult(v);
+      S.mode='result'; S.override=`Ans→${L}`; S.lastEvent='sto';
+      toast(`${L}에 저장했어요. ALPHA + 해당 키로 불러옵니다.`);
+    } else {
+      FL={irr:!isRat(S.vars[L]),pi:false}; S.result=makeResult(S.vars[L]); S.mode='result'; S.override=`${L}=`;
+    }
+    return;
+  }
+  if(S.mode==='editor'){ if(sh||al) return; return editorKey(id); }
+  if(S.mode==='error'){
+    if(id==='ac'){ S.mode='edit'; S.tokens=[]; S.cur=0; }
+    else if(id==='left'||id==='right'){ S.mode='edit'; }
+    return;
+  }
+
+  /* SHIFT 기능 */
+  if(sh){
+    switch(id){
+      case 'mode': return openSetup();
+      case '9': return openClr();
+      case 'ac': S.mode='off'; return;
+      case 'exp': startInput(id,false); return insTok({t:'pi'});
+      case 'ln': startInput(id,false); return insTpl('pexp');
+      case 'log': startInput(id,false); return insTpl('p10');
+      case 'sqrt': startInput(id,false); return insTpl('cbrt');
+      case 'sq': startInput(id,true); return insTok({t:'cube'});
+      case 'inv': startInput(id,true); return insTok({t:'fact'});
+      case 'sin': case 'cos': case 'tan': startInput(id,false); return insTok({t:'fn',v:'a'+id});
+      case 'rcl': S.pending='sto'; return;
+      case 'eq': if(S.tokens.length && doEval()){ S.result.fi=S.result.forms.length-1; } return;
+      case '1':
+        if(S.calcMode!=='STAT') return unsupported('SHIFT 1 (STAT 메뉴는 MODE 3 통계 모드에서 열려요)');
+        if(S.mode==='editor'){ toast('표 입력 중에는 메뉴 번호가 달라요. AC로 표를 닫은 뒤 SHIFT 1을 누르세요.',true); return; }
+        return openStatMenu();
+      case 'eng': return eng(+3);
+      default: { const k=KEYDEF[id]; return unsupported('SHIFT '+((k&&k.s)||id).replace(/<[^>]+>/g,'')); }
+    }
+  }
+  /* ALPHA 기능 */
+  if(al){
+    if(id==='exp'){ startInput(id,false); return insTok({t:'e'}); }
+    if(VARKEY[id]){ startInput(id,false); return insTok({t:'var',v:VARKEY[id]}); }
+    return unsupported('ALPHA '+((KEYDEF[id]&&KEYDEF[id].a)||id));
+  }
+
+  if(/^[0-9]$/.test(id)){ startInput(id); return insTok({t:'d',v:id}); }
+  switch(id){
+    case 'dot': startInput(id); return insTok({t:'d',v:'.'});
+    case 'exp': startInput(id); return insTok({t:'E'});
+    case 'neg': startInput(id); return insTok({t:'neg'});
+    case 'add': case 'sub': case 'mul': case 'div':
+      startInput(id); return insTok({t:'op',v:{add:'+',sub:'-',mul:'*',div:'/'}[id]});
+    case 'lp': startInput(id); return insTok({t:'lp'});
+    case 'rp': startInput(id); return insTok({t:'rp'});
+    case 'frac': case 'sqrt': case 'pow': case 'logab': startInput(id); return insTpl(id);
+    case 'sq': case 'inv': startInput(id); return insTok({t:id});
+    case 'log': case 'ln': case 'sin': case 'cos': case 'tan': startInput(id); return insTok({t:'fn',v:id});
+    case 'ans': startInput(id); return insTok({t:'ans'});
+    case 'eq': if(S.tokens.length) doEval(); return;
+    case 'ac': S.mode='edit'; S.tokens=[]; S.cur=0; S.result=null; S.override=null; return;
+    case 'del': if(S.mode==='result'){ S.mode='edit'; S.cur=S.tokens.length; S.override=null; return; } return delAtCursor();
+    case 'left': case 'right':
+      if(S.mode==='result'){ S.mode='edit'; S.override=null; S.cur= id==='left'?S.tokens.length:0; return; }
+      S.cur=Math.max(0,Math.min(S.tokens.length,S.cur+(id==='left'?-1:1))); return;
+    case 'down': case 'up': {
+      if(S.mode==='edit' && S.tokens.length){
+        const st=enclosing().reverse();
+        const f=st.find(x=>x.kind==='frac' && x.slot===(id==='down'?0:1));
+        if(f){ S.cur = id==='down' ? matchTpl(f.open).seps[0]+1 : f.open+1; }
+        return;
+      }
+      // REPLAY: 결과 화면이나 빈 입력에서 ▲▼로 이전 계산 불러오기
+      if(!S.hist.length) return;
+      if(S.mode==='edit') S.hi=S.hist.length;
+      const ni=S.hi+(id==='up'?-1:1);
+      if(ni<0||ni>=S.hist.length) return;
+      S.hi=ni; S.tokens=JSON.parse(S.hist[ni]); S.cur=S.tokens.length; doEval(true);
+      return;
+    }
+    case 'eng': return eng(-3);
+    case 'sd': return sd();
+    case 'mode': return openMode();
+    case 'rcl': S.pending='rcl'; return;
+    case 'calc': return unsupported('CALC');
+    case 'int': return unsupported('∫ 적분');
+    case 'hyp': return unsupported('hyp');
+    case 'dms': return unsupported('°′″');
+    case 'mplus': return unsupported('M+');
+  }
+}
+function eng(dir){
+  if(S.mode==='edit' && S.tokens.length){ if(!doEval()) return; }
+  if(S.mode!=='result'||!S.result) return;
+  const r=S.result;
+  if(r.eng==null){ const base = r.v===0?0:Math.floor(Math.log10(Math.abs(r.v))/3)*3; r.eng = base + (dir>0?3:0); }
+  else {
+    const ne=r.eng+dir; const m=Math.abs(r.v/Math.pow(10,ne));
+    if(m>=1e10 || (r.v!==0 && m<1e-9)) return;
+    r.eng=ne;
+  }
+  S.lastEvent='eng';
+}
+function sd(){
+  if(S.mode==='edit' && S.tokens.length){ if(!doEval()) return; if(S.result.forms.length>1) S.result.fi=1; return; }
+  if(S.mode!=='result'||!S.result) return;
+  const r=S.result; r.eng=null;
+  if(r.forms.length>1) r.fi=(r.fi+1)%r.forms.length;
+}
+
+/* ---- 메뉴 ---- */
+function exitMenu(){ S.menu=null; S.mode='edit'; S.tokens=[]; S.cur=0; S.result=null; S.override=null; }
+function openMode(){
+  S.mode='menu';
+  S.menu={lines:['1:COMP     2:CMPLX','3:STAT     4:BASE-N','5:EQN      6:MATRIX','7:TABLE    8:VECTOR'],
+    onKey(k){
+      if(k==='1'){ const was=S.calcMode; S.calcMode='COMP'; S.stat={x:[],y:[],row:0,col:0,typ:''}; exitMenu(); S.lastEvent='comp'; toast(was==='STAT'?'COMP(일반 계산)로 돌아왔어요. 통계 데이터는 지워졌어요.':'COMP(일반 계산) 모드입니다.'); }
+      else if(k==='3'){
+        S.menu={lines:['1:1-VAR  2:A+BX','3:_+CX²  4:ln X','5:e^X    6:A•B^X','7:A•X^B  8:1/X'],onKey(z){
+          if(z==='2'){ S.calcMode='STAT'; S.stat={x:[],y:[],row:0,col:0,typ:''}; S.menu=null; S.mode='editor'; S.tokens=[]; S.cur=0; S.result=null; S.lastEvent='statEditor'; toast('STAT A+BX: x열부터 입력하고 = 를 누르세요.'); }
+          else if(/^[1-8]$/.test(z)){ exitMenu(); toast('이 연습기는 2:A+BX(직선 회귀)만 지원해요.',true); }
+          else if(z==='ac') exitMenu();
+        }};
+      }
+      else if(/^[2-8]$/.test(k)){ exitMenu(); toast('이 연습기는 1:COMP, 3:STAT 모드만 지원해요.', true); }
+      else if(k==='ac') exitMenu();
+    }};
+}
+function openStatMenu(){
+  const from=S.mode; S.mode='menu';
+  const pick=(lines,map,post)=>{ S.menu={lines,onKey(z){ if(z==='ac') return exitMenu(); const v=map[z]; if(!v) return;
+    const keep=S.mode; S.menu=null; S.mode=from;
+    if(S.mode==='result'){ startInput('stat', post?true:false); }
+    insTok(post?{t:v}:{t:'sv',v}); S.mode='edit'; }}; };
+  S.menu={lines:['1:Type   2:Data','3:Sum    4:Var','5:Reg    6:MinMax'],onKey(k){
+    if(k==='ac') return exitMenu();
+    if(k==='1'){ S.menu={lines:['1:1-VAR  2:A+BX','3:_+CX²  4:ln X','5:e^X    6:A•B^X','7:A•X^B  8:1/X'],onKey(z){ if(z==='2'){ S.stat={x:[],y:[],row:0,col:0,typ:''}; S.menu=null; S.mode='editor'; S.lastEvent='statEditor'; } else if(z==='ac') exitMenu(); else if(/^[1-8]$/.test(z)){ exitMenu(); toast('이 연습기는 A+BX만 지원해요.',true);} }}; }
+    else if(k==='2'){ S.menu=null; S.mode='editor'; S.stat.row=0; S.stat.col=0; S.stat.typ=''; }
+    else if(k==='3') pick(['1:Σx²  2:Σx','3:Σy²  4:Σy','5:Σxy  6:Σx³','7:Σx²y 8:Σx⁴'],{1:'sx2',2:'sx',3:'sy2',4:'sy',5:'sxy',6:'sx3',7:'sx2y',8:'sx4'});
+    else if(k==='4') pick(['1:n      2:x̄','3:xσn    4:xσn-1','5:ȳ      6:yσn','7:yσn-1'],{1:'n',2:'mx',3:'xsn',4:'xsn1',5:'my',6:'ysn',7:'ysn1'});
+    else if(k==='5'){ S.menu={lines:['1:A      2:B','3:r      4:x̂','5:ŷ'],onKey(z){
+        if(z==='ac') return exitMenu();
+        const m={1:'A',2:'B',3:'r'};
+        if(m[z]){ S.menu=null; S.mode=from; if(S.mode==='result') startInput('stat',false); insTok({t:'sv',v:m[z]}); S.mode='edit'; }
+        else if(z==='4'||z==='5'){ S.menu=null; S.mode=from; if(S.mode==='result') startInput('stat',true); insTok({t:z==='4'?'xhat':'yhat'}); S.mode='edit'; }
+      }}; }
+    else if(k==='6') pick(['1:minX   2:maxX','3:minY   4:maxY'],{1:'minX',2:'maxX',3:'minY',4:'maxY'});
+  }};
+}
+function editorKey(id){
+  const st=S.stat, n=st.x.length;
+  if(/^[0-9]$/.test(id)){ st.typ+=id; return; }
+  switch(id){
+    case 'dot': st.typ+='.'; return;
+    case 'exp': st.typ+=(st.typ===''?'1':'')+'E'; return;
+    case 'neg': st.typ+='-'; return;
+    case 'del': if(st.typ){ st.typ=st.typ.slice(0,-1); } else if(st.row<n){ st.x.splice(st.row,1); st.y.splice(st.row,1); } return;
+    case 'eq': {
+      if(!st.typ) return;
+      const v=Number(st.typ.replace('E','e'));
+      if(!isFinite(v)){ toast('숫자 형식이 맞지 않아요. DEL로 고쳐 주세요.',true); return; }
+      if(st.row>=n){ if(n>=40){ toast('A+BX는 최대 40행이에요.',true); return; } st.x.push(0); st.y.push(0); }
+      (st.col===0?st.x:st.y)[st.row]=v; st.typ='';
+      st.row=Math.min(st.row+1, st.x.length); S.lastEvent='statData'; return;
+    }
+    case 'up': st.typ=''; st.row=Math.max(0,st.row-1); return;
+    case 'down': st.typ=''; st.row=Math.min(n,st.row+1); return;
+    case 'left': st.typ=''; st.col=0; return;
+    case 'right': st.typ=''; st.col=1; return;
+    case 'ac': S.mode='edit'; S.tokens=[]; S.cur=0; S.result=null; S.override=null; toast('통계 계산 화면이에요. SHIFT 1로 Sum·Var·Reg 값을 불러와요.'); return;
+    case 'mode': return openMode();
+  }
+}
+function renderEditor(){
+  const st=S.stat, n=st.x.length, total=n+1;
+  const top=Math.max(0,Math.min(st.row-1,total-3));
+  const cell=v=>{ if(v===undefined) return '      '; let t=String(Number(v.toPrecision(6))); if(t.length>7) t=v.toExponential(1); return t.padStart(7,' '); };
+  let lines=['   │'+'x'.padStart(7,' ')+' │'+'y'.padStart(7,' ')];
+  for(let i=top;i<Math.min(total,top+3);i++){
+    const c=(col,v)=>{ const txt=cell(v); return (i===st.row&&st.col===col)?`<mark>${txt}</mark>`:txt; };
+    lines.push(String(i+1).padStart(2,' ')+' │'+c(0,st.x[i])+' │'+c(1,st.y[i]));
+  }
+  const curV=(st.col===0?st.x:st.y)[st.row];
+  const bottom = st.typ ? st.typ.replace(/E/g,'×10^').replace(/-/g,'−') : (curV!==undefined? String(curV).replace(/-/g,'−') : '');
+  lines.push(`<span class="edbot">${bottom}</span>`);
+  return lines.join('\n');
+}
+function openSetup(){
+  S.mode='menu';
+  S.menu={lines:['1:MthIO   2:LineIO','3:Deg     4:Rad','5:Gra     6:Fix','7:Sci     8:Norm'],
+    onKey(k){
+      const st=S.setup;
+      if(k==='1'){ S.menu={lines:['1:MathO','2:LineO'],onKey(z){ if(z==='1'||z==='2'){ st.io='Math'; st.out=z==='1'?'Math':'Line'; exitMenu(); toast(z==='1'?'MthIO-MathO: 결과를 분수·π 꼴로 표시':'MthIO-LineO: 결과를 소수로 표시'); } else if(z==='ac') exitMenu(); }}; }
+      else if(k==='2'){ st.io='Line'; st.out='Line'; exitMenu(); toast('LineIO: 실물은 한 줄 입력 방식이 됩니다. 이 연습기는 입력 모양만 MathIO로 보여 줘요.'); }
+      else if(k==='3'||k==='4'||k==='5'){ st.angle={3:'Deg',4:'Rad',5:'Gra'}[k]; exitMenu(); S.lastEvent='set'+st.angle; toast(`각도 단위: ${st.angle}`); }
+      else if(k==='6'||k==='7'){
+        const kind=k==='6'?'Fix':'Sci';
+        S.menu={lines:[`${kind} 0~9?`],onKey(d){ if(/^[0-9]$/.test(d)){ st.disp=kind; st.dn=+d; exitMenu(); toast(`표시 형식: ${kind} ${d}`);} else if(d==='ac') exitMenu(); }};
+      }
+      else if(k==='8'){
+        S.menu={lines:['Norm 1~2?'],onKey(d){ if(d==='1'||d==='2'){ st.disp='Norm'; st.dn=+d; exitMenu(); toast(`표시 형식: Norm ${d}`);} else if(d==='ac') exitMenu(); }};
+      }
+      else if(k==='ac') exitMenu();
+    }};
+}
+function openClr(){
+  S.mode='menu';
+  S.menu={lines:['Clear?','1:Setup','2:Memory','3:All'],
+    onKey(k){
+      if(k==='ac') return exitMenu();
+      if(!['1','2','3'].includes(k)) return;
+      const q={1:'Reset Setup?',2:'Clear Memory?',3:'Reset All?'}[k];
+      S.menu={lines:[q,'','[=] :Yes','[AC]:Cancel'],onKey(z){
+        if(z==='ac') return exitMenu();
+        if(z!=='eq') return;
+        if(k!=='2') S.setup={io:'Math',out:'Math',angle:'Deg',disp:'Norm',dn:1};
+        if(k!=='1'){ Object.keys(S.vars).forEach(v=>S.vars[v]=0); S.ans=0; S.ansIrr=false; }
+        const done={1:'Reset Setup',2:'Clear Memory',3:'Reset All'}[k];
+        S.menu={lines:[done,'','Press [AC] Key'],onKey(w){ if(w==='ac'){ exitMenu(); if(k==='3') S.lastEvent='resetAll'; toast('초기화 완료: MthIO · Deg · Norm1'); } }};
+      }};
+    }};
+}
+
+/* ---- 화면 그리기 ---- */
+function render(){
+  const ind=document.getElementById('ind'), inp=document.getElementById('inp'), res=document.getElementById('res');
+  const st=S.setup;
+  if(S.mode==='off'){ ind.innerHTML=''; inp.innerHTML=''; res.innerHTML=''; res.className='res'; }
+  else {
+    const on=(c,t)=>`<span class="${c?'':'off'}">${t}</span>`;
+    ind.innerHTML = on(S.shift,'S')+on(S.alpha,'A')+on(S.pending,S.pending==='sto'?'STO':'RCL')+on(true,st.angle[0])+on(st.disp!=='Norm',st.disp==='Fix'?'FIX':'SCI')+on(st.io==='Math','Math')+on(S.calcMode==='STAT','STAT');
+    res.className='res';
+    if(S.mode==='editor'){
+      inp.innerHTML=''; inp.style.display='none'; res.className='res err';
+      res.innerHTML=`<div class="menu ed">${renderEditor()}</div>`;
+    } else if(S.mode==='menu'){
+      inp.innerHTML=''; res.className='res err';
+      res.innerHTML=`<div class="menu">${S.menu.lines.join('\n')}</div>`;
+      inp.style.display='none';
+    } else {
+      inp.style.display='';
+      if(S.mode==='error'){
+        inp.innerHTML='';
+        res.className='res err';
+        res.innerHTML=`<div class="menu">${S.err}\n[AC] :Cancel\n[◀][▶]:Goto</div>`;
+      } else {
+        inp.innerHTML = S.override ? S.override : renderInput(S.mode==='edit'?S.cur:-1);
+        res.innerHTML = (S.mode==='result'&&S.result) ? fmtResult(S.result) : '';
+        if(S.mode==='edit'){ const c=inp.querySelector('.caret'); if(c && c.scrollIntoView) c.scrollIntoView({block:'nearest',inline:'nearest'}); }
+      }
+    }
+  }
+  document.querySelectorAll('[data-k="shift"]').forEach(b=>b.classList.toggle('latch',S.shift));
+  document.querySelectorAll('[data-k="alpha"]').forEach(b=>b.classList.toggle('latch',S.alpha));
+  paintGuide();
+}
+
+/* ================= 레슨 ================= */
+const PREFIX='<div class="prefix"><span>10³ k</span><span>10⁻³ m</span><span>10⁻⁶ μ</span><span>10⁻⁹ n</span><span>10⁻¹² p</span><span>10⁻¹⁵ f</span></div>';
+// 'K' : "10000 div 10 eq" → 1 0 0 0 0 div 1 0 eq (숫자를 키 하나씩으로 풀어 줌)
+function K(str){ return str.split(' ').flatMap(t=>/^[0-9.]+$/.test(t)? t.split('').map(c=>c==='.'?'dot':c) : [t]).join(' '); }
+const V=(v,expect,t,keys,extra)=>({t,keys:K(keys),expect,check:Object.assign({type:'value',v},extra||{})});
+const D=(v,expect,t,keys)=>({t,keys:K(keys),expect,check:{type:'decimal',v}});
+const EN=(v,exp,expect,t,keys)=>({t,keys:K(keys||'eng'),expect,check:{type:'eng',v,exp}});
+const EV=(ev,expect,t,keys)=>({t,keys:K(keys),expect,check:{type:'event',ev}});
+const STATIN=(xs,ys)=>[
+  EV('statEditor','화면 위 STAT, x·y 표','MODE → 3(STAT) → 2(A+BX)','mode 3 2'),
+  {t:`x열: ${xs.join(' = ')} =`,keys:K(xs.map(x=>x+' eq').join(' ')),expect:'x열이 채워지고 커서는 빈 칸으로',check:{type:'statx',x:xs}},
+  {t:`▶ 그리고 ▲ ${xs.length}번으로 y열 첫 칸 → ${ys.join(' = ')} =`,keys:K('right '+'up '.repeat(xs.length)+ys.map(y=>y+' eq').join(' ')),expect:'y열이 채워짐',check:{type:'staty',y:ys}}
+];
+const BACK=EV('comp','STAT 표시가 사라짐','MODE → 1(COMP)로 일반 계산 복귀','mode 1');
+
+const LESSONS = {
+basic:[
+ {tag:'B1',title:'시험 전 초기화',situ:'다른 사람이 쓰던 계산기는 각도 단위나 표시 형식이 바뀌어 있을 수 있어요. 모든 설정을 공장 상태로 돌립니다.',
+  steps:[{t:'SHIFT 9(CLR) → 3(All) → = → AC',keys:'shift 9 3 eq ac',expect:'화면: Reset All',check:{type:'event',ev:'resetAll'}}],
+  tip:'초기화 후 상태는 MthIO · Deg · Norm1입니다. 화면 위쪽에 <b>D</b>와 <b>Math</b>가 보이면 정상입니다.'},
+ {tag:'B2',title:'각도 단위 Deg 확인',situ:'AMR 센서의 cos²θ 계산(예상 10-D)은 각도 단위에 따라 답이 달라집니다. Rad 상태에서 sin 30을 누르면 −0.988이 나와요.',
+  steps:[EV('setDeg','화면 위 D 표시','SHIFT MODE(SETUP) → 3(Deg)','shift mode 3'),
+         V(0.5,'→ 1/2','sin 30 = (닫는 괄호는 생략해도 됨)','sin 30 eq')],
+  tip:'Math 모드에서는 sin 30이 0.5가 아니라 분수 1/2로 나와요. 함수 뒤 괄호는 = 를 누르면 끝에서 자동으로 닫힙니다.'},
+ {tag:'B3',title:'×10ˣ 키와 (−) 키',situ:'기출 2번(ppm)·홀 전압처럼 10의 거듭제곱이 많은 문제의 기본 입력입니다. 4.7×10⁻⁶ × 2.2×10³을 계산해 봅니다.',
+  steps:[V(0.01034,'→ 517/50000 (분수로 표시됨)','4.7 ×10ˣ (−)6 × 2.2 ×10ˣ 3 =','4.7 exp neg 6 mul 2.2 exp 3 eq'),
+         D(0.01034,'→ 0.01034','S⇔D로 소수 보기','sd')],
+  tip:'지수의 마이너스에 빼기 키 <b>−</b>를 쓰면 Syntax ERROR. 반드시 <b>(−)</b>. ×10ˣ는 "×10"까지 한 번에 입력하므로 × 키를 따로 누르지 않아요.'},
+ {tag:'B4',title:'ENG로 단위 접두어 읽기',situ:'nH, pF, mV처럼 답을 접두어 단위로 써야 할 때 씁니다. 0.000034 A가 몇 μA인지 읽어 봅니다.',
+  steps:[V(3.4e-5,'→ 17/500000','0.000034 =','0.000034 eq'),
+         EN(3.4e-5,-6,'→ 34×10⁻⁶ = 34 μA','ENG: 지수를 3의 배수로'),
+         EN(3.4e-5,-3,'→ 0.034×10⁻³ = 0.034 mA','SHIFT ENG(←): 지수를 3만큼 키우기','shift eng')],
+  tip:'ENG를 누를 때마다 지수가 3씩 작아지고, SHIFT ENG는 3씩 커집니다.'+PREFIX},
+ {tag:'B5',title:'분수 틀 □/□ 와 ▼',situ:'브리지·전압 분배처럼 분모에 덧셈이 있는 식은 분수 틀로 쓰면 괄호 실수가 없습니다.',
+  formula:'(5 × 10) / (10 + 4.7)',
+  steps:[V(50/14.7,'→ 500/147','□/□ → 5×10 → ▼(분모로) → 10+4.7 → =','frac 5 mul 10 down 10 add 4.7 eq'),
+         D(50/14.7,'→ 3.401360544','S⇔D로 소수 보기','sd')],
+  tip:'분자 → 분모는 <b>▼</b>, 분모 → 분자는 <b>▲</b>, 분수 밖으로 나갈 때는 <b>▶</b>.'},
+ {tag:'B6',title:'x□ 2÷3 과 ▶ (ppm 표면 원자 수)',situ:'기출 2번의 (개/cm³)^(2/3) 계산에 쓰는 입력입니다. 지수 칸에 2÷3을 넣고 ▶로 빠져나와요.',
+  steps:[V(4,'→ 4','8 x□ 2÷3 =','8 pow 2 div 3 eq'),
+         V(4096,'→ 4096','2 x□ 12 =','2 pow 12 eq'),
+         V(1024,'→ 1024','2 x□ 12 ▶ ÷ 4 =','2 pow 12 right div 4 eq')],
+  tip:'세 번째에서 ▶를 빼먹으면 2<sup>12÷4</sup> = 8 이 나옵니다. 지수 칸 뒤에 더 쓸 게 있으면 반드시 ▶.'},
+ {tag:'B7',title:'√ 결과 10√26 → 소수',situ:'HW1 3번 |Z_L| = √(50²+10²)는 50.99가 아니라 10√26으로 나옵니다. 소수로 바꾸는 두 가지 방법을 연습해요.',
+  steps:[V(Math.sqrt(2600),'→ 10√26','√□ 50 x² + 10 x² =','sqrt 50 sq add 10 sq eq'),
+         D(Math.sqrt(2600),'→ 50.99019514','S⇔D','sd'),
+         D(Math.sqrt(1125),'→ 33.54101966 (15√5를 거치지 않음)','√□ 30 x² + 15 x² 를 SHIFT = 로 끝내기','sqrt 30 sq add 15 sq shift eq')],
+  tip:'= 대신 <b>SHIFT =</b>를 누르면 처음부터 소수로 나와요. √□ 틀 안에서 + 를 눌러도 루트 안에 계속 들어갑니다.'},
+ {tag:'B8',title:'Ans로 이어서 계산',situ:'답이 나온 상태에서 연산자부터 누르면 앞의 답(Ans)이 자동으로 붙습니다. 기출 2번처럼 단계가 긴 문제에서 필수예요.',
+  steps:[V(3.3/1024,'→ 33/10240','3.3 ÷ 1024 =','3.3 div 1024 eq'),
+         V(1.65,'화면: Ans×512 → 33/20','바로 × 512 =','mul 512 eq',{ans:true})],
+  tip:'답이 나온 뒤 숫자부터 누르면 새 계산이 시작되고, + − × ÷ x² x□ 부터 누르면 Ans가 이어집니다.'},
+ {tag:'B9',title:'변수 저장 STO',situ:'중간값을 A에 저장해 두면 긴 문제에서 잃어버리지 않아요. g = 9.8을 저장하고 불러 써 봅니다.',
+  steps:[{t:'9.8 = → SHIFT RCL(STO) → (−)(A)',keys:K('9.8 eq shift rcl neg'),expect:'화면: Ans→A',check:{type:'stored',var:'A',v:9.8}},
+         V(49,'→ 49','5 × ALPHA (−)(A) =','5 mul alpha neg eq')],
+  tip:'변수 키는 빨간 글자: (−)=A, °′″=B, hyp=C, sin=D, cos=E, tan=F, )=X, S⇔D=Y, M+=M.'},
+ {tag:'B10',title:'생략 곱셈 우선순위',situ:'1÷2π를 입력하면 1÷2×π가 아니라 1÷(2π)로 계산됩니다. 임피던스 문제의 2πf가 여기에 해당해요.',
+  steps:[V(1/(2*Math.PI),'→ 0.1591549431 = 1/(2π)','1 ÷ 2 SHIFT ×10ˣ(π) =','1 div 2 shift exp eq')],
+  tip:'ES 계열은 곱셈 기호를 생략한 곱(2π, 3A)을 × ÷보다 먼저 계산합니다. 헷갈리면 문제집처럼 괄호로 감싸세요: 10 ÷ (2 × π × 1×10⁹).'}
+],
+stat:[
+ {tag:'기출 1',ref:'문제집 1-A',title:'회귀로 a, b · 정확도 검산',situ:'작년 중간고사 1번. 데이터 (5,16), (7,30), (9,38)로 교정 직선을 구하고, b점(입력 7, 출력 30)의 오차율과 정확도를 구합니다.',
+  formula:'계산기 A = 절편 b,  B = 기울기 a  →  y = 5.5x − 10.5',
+  steps:[...STATIN([5,7,9],[16,30,38]),
+    V(-10.5,'→ A = −10.5 (절편)','AC → SHIFT 1 → 5(Reg) → 1(A) → =','ac shift 1 5 1 eq'),
+    V(5.5,'→ B = 5.5 (기울기 = 감도)','SHIFT 1 → 5 → 2(B) → =','shift 1 5 2 eq'),
+    V(40.5/5.5,'→ 7.363636364 (읽은 입력 xₘ)','30 SHIFT 1 → 5 → 4(x̂) → =','30 shift 1 5 4 eq'),
+    V((40.5/5.5-7)/7*100,'→ 5.194805195 %','(Ans − 7) ÷ 7 × 100 = (오차율)','lp ans sub 7 rp div 7 mul 100 eq'),
+    V(100-(40.5/5.5-7)/7*100,'→ 94.80519481 %','100 − Ans = (정확도)','100 sub ans eq'),
+    BACK],
+  tip:'계산기의 <b>A가 절편, B가 기울기</b>예요. 강의 y = ax + b와 글자가 반대입니다. x̂는 "출력이 30일 때의 입력"을 바로 구해 줘요. 교수님 풀이는 7.36으로 반올림해 5.14 %, 94.86 %입니다.'},
+ {tag:'HW1-1·2',ref:'문제집 1-B',title:'r로 R² 검산',situ:'HW1. 데이터 (4,18), (6,30), (8,39). 손으로 구한 R² = 0.9932를 계산기 r로 확인하고 b점 정확도까지 구합니다.',
+  steps:[...STATIN([4,6,8],[18,30,39]),
+    V(0.9966161,'→ r = 0.9966158955','AC → SHIFT 1 → 5 → 3(r) → =','ac shift 1 5 3 eq',{tol:1e-6}),
+    V(1-1.5/222,'→ 0.9932432432 (= R²)','x² =','sq eq'),
+    V(32.5/5.25,'→ 6.19047619','30 SHIFT 1 5 4(x̂) =','30 shift 1 5 4 eq'),
+    V((32.5/5.25-6)/6*100,'→ 3.174603175 % (정확도 96.83 %)','(Ans − 6) ÷ 6 × 100 =','lp ans sub 6 rp div 6 mul 100 eq'),
+    BACK],
+  tip:'직선 회귀에서는 R² = r²입니다. 시험에서는 SS_res, SS_tot 표로 과정을 쓰고, 계산기는 확인용으로 쓰세요.'},
+ {tag:'유사',ref:'문제집 1-D',title:'점 4개 + MDL',situ:'데이터 (1,2.1), (2,3.9), (3,6.2), (4,7.8), 노이즈 σ = 0.05. 점이 4개면 ▲를 4번 누릅니다.',
+  steps:[...STATIN([1,2,3,4],[2.1,3.9,6.2,7.8]),
+    V(1.94,'→ B = 1.94','AC → SHIFT 1 5 2 =','ac shift 1 5 2 eq'),
+    V(0.15,'→ A = 0.15','SHIFT 1 5 1 =','shift 1 5 1 eq'),
+    V(0.15/1.94,'→ 0.07731958763 (MDL = 3σ/S)','3 × 0.05 ÷ SHIFT 1 5 2(B) =','3 mul 0.05 div shift 1 5 2 eq'),
+    BACK],
+  tip:'B(감도)를 다시 칠 필요 없이 SHIFT 1 5 2로 식 안에 넣을 수 있어요.'},
+ {tag:'기출 1',ref:'문제집 1-A',title:'Σ값으로 행렬 표 검산',situ:'시험에서는 XᵀX = [[Σx², Σx],[Σx, N]], Xᵀy = [Σxy, Σy]를 직접 써야 해요. 표 계산이 맞는지 계산기로 확인합니다.',
+  steps:[...STATIN([5,7,9],[16,30,38]),
+    V(155,'→ Σx² = 155','AC → SHIFT 1 → 3(Sum) → 1(Σx²) → =','ac shift 1 3 1 eq'),
+    V(21,'→ Σx = 21','SHIFT 1 3 2(Σx) =','shift 1 3 2 eq'),
+    V(632,'→ Σxy = 632','SHIFT 1 3 5(Σxy) =','shift 1 3 5 eq'),
+    V(24,'→ det = 3×155 − 21² = 24','SHIFT 1 4 1(n) × SHIFT 1 3 1 − SHIFT 1 3 2 x² =','shift 1 4 1 mul shift 1 3 1 sub shift 1 3 2 sq eq'),
+    BACK],
+  tip:'Sum 메뉴: 1 Σx², 2 Σx, 3 Σy², 4 Σy, 5 Σxy. Var 메뉴의 1번이 n(데이터 개수)이에요.'}
+],
+exam:[
+ {tag:'기출 1',ref:'문제집 1-A',title:'공식으로 a, b 계산',situ:'회귀 모드 없이 역행렬 공식으로 a, b를 계산합니다. 시험 답안에 쓰는 과정 그대로예요.',
+  formula:'a = (3×632 − 21×84)/24,  b = (−21×632 + 155×84)/24',
+  steps:[V(5.5,'→ 11/2','(3 × 632 − 21 × 84) ÷ 24 =','lp 3 mul 632 sub 21 mul 84 rp div 24 eq'),
+    V(-10.5,'→ −21/2','((−)21 × 632 + 155 × 84) ÷ 24 =','lp neg 21 mul 632 add 155 mul 84 rp div 24 eq'),
+    V(40.5/5.5,'→ 81/11','(30 + 10.5) ÷ 5.5 =','lp 30 add 10.5 rp div 5.5 eq'),
+    V((40.5/5.5-7)/7*100,'→ 400/77','(Ans − 7) ÷ 7 × 100 =','lp ans sub 7 rp div 7 mul 100 eq'),
+    D((40.5/5.5-7)/7*100,'→ 5.194805195 %','S⇔D','sd')],
+  tip:'음수 b의 첫 글자는 빼기가 아니라 <b>(−)</b>. 분수로 나와도 당황하지 말고 S⇔D.'},
+ {tag:'유사',ref:'문제집 1-C',title:'b가 0으로 나오는 경우',situ:'데이터 (2,7), (4,12), (6,20). Σx = 12, Σx² = 56, Σy = 39, Σxy = 182, det = 24.',
+  steps:[V(3.25,'→ 13/4','a: (3 × 182 − 12 × 39) ÷ 24 =','lp 3 mul 182 sub 12 mul 39 rp div 24 eq'),
+    V(0,'→ 0','b: ((−)12 × 182 + 56 × 39) ÷ 24 =','lp neg 12 mul 182 add 56 mul 39 rp div 24 eq'),
+    V(1-1.5/86,'→ 169/172 (R² = 0.9826)','R²: 1 − 1.5 ÷ 86 =','1 sub 1.5 div 86 eq'),
+    V(12/3.25,'→ 48/13 (xₘ = 3.692)','12 ÷ 3.25 =','12 div 3.25 eq'),
+    V((4-12/3.25)/4*100,'→ 100/13','오차율: (4 − Ans) ÷ 4 × 100 =','lp 4 sub ans rp div 4 mul 100 eq'),
+    D((4-12/3.25)/4*100,'→ 7.692307692 %','S⇔D','sd')],
+  tip:'b = 0이 나와도 틀린 게 아니에요. 원점을 지나는 직선일 뿐입니다.'},
+ {tag:'HW1-3',ref:'문제집 2-A',title:'임피던스 매칭 L 값',situ:'R_S = 50 Ω, f₀ = 1 GHz, Z_L = 50 − j10 Ω. |Z_L|과 직렬 인덕터 L을 구합니다.',
+  formula:'|Z_L| = √(50² + 10²),  L = 10 / (2π × 10⁹)',
+  steps:[V(Math.sqrt(2600),'→ 10√26','√□ 50 x² + 10 x² =','sqrt 50 sq add 10 sq eq'),
+    D(Math.sqrt(2600),'→ 50.99019514 Ω','S⇔D','sd'),
+    V(10/(2*Math.PI*1e9),'→ 1.591549431×10⁻⁹','10 ÷ (2 × π × 1 ×10ˣ 9) =','10 div lp 2 mul shift exp mul 1 exp 9 rp eq'),
+    EN(10/(2*Math.PI*1e9),-9,'→ 1.591549431×10⁻⁹ = 1.59 nH','ENG (이미 10⁻⁹면 그대로)')],
+  tip:'π는 SHIFT ×10ˣ. 분모 전체를 괄호로 감싸야 2π×10⁹ 전체로 나눠요.'},
+ {tag:'유사',ref:'문제집 2-B',title:'커패시터 C 값',situ:'f₀ = 2 GHz, Z_L = 30 + j15 Ω. +j15를 지울 직렬 커패시터 C를 구합니다.',
+  formula:'C = 1 / (2π × 2×10⁹ × 15)',
+  steps:[V(Math.sqrt(1125),'→ 15√5','√□ 30 x² + 15 x² =','sqrt 30 sq add 15 sq eq'),
+    D(Math.sqrt(1125),'→ 33.54101966 Ω','S⇔D','sd'),
+    V(1/(2*Math.PI*2e9*15),'→ 5.305164770×10⁻¹²','1 ÷ (2 × π × 2 ×10ˣ 9 × 15) =','1 div lp 2 mul shift exp mul 2 exp 9 mul 15 rp eq'),
+    EN(1/(2*Math.PI*2e9*15),-12,'→ 5.31 pF','ENG')],
+  tip:'10⁻¹²는 p(피코). ENG가 지수를 3의 배수로 맞춰 줍니다.'},
+ {tag:'유사',ref:'문제집 2-C',title:'허수부만 없애면 끝일까?',situ:'R_S = 50 Ω, f₀ = 500 MHz, Z_L = 75 − j25 Ω. −j25를 지울 직렬 인덕터 L.',
+  steps:[V(25/(2*Math.PI*5e8),'→ 7.957747155×10⁻⁹','25 ÷ (2 × π × 5 ×10ˣ 8) =','25 div lp 2 mul shift exp mul 5 exp 8 rp eq'),
+    EN(25/(2*Math.PI*5e8),-9,'→ 7.96 nH','ENG')],
+  tip:'500 MHz = 5×10⁸ Hz. 허수부를 지워도 실수부 75 Ω ≠ 50 Ω이라 완전 매칭은 아니에요 [AI 보충].'},
+ {tag:'기출 3',ref:'문제집 3-A',title:'Pd 브리지 출력',situ:'Pd 4개 모두 100 Ω, V_in = 1 V, R₃만 노출, 감도 10⁻³ Ω/ppm, 수소 1000 ppm.',
+  formula:'ΔR = 1000 × 10⁻³,  V_out = 101/201 − 0.5',
+  steps:[V(1,'→ ΔR = 1 Ω','1000 × 1 ×10ˣ (−)3 =','1000 mul 1 exp neg 3 eq'),
+    V(101/201-0.5,'→ 1/402','101 ÷ 201 − 0.5 =','101 div 201 sub 0.5 eq'),
+    D(101/201-0.5,'→ 2.487562189×10⁻³','S⇔D','sd'),
+    EN(101/201-0.5,-3,'→ 2.49 mV','ENG')],
+  tip:'교수님 풀이는 0.502로 반올림해 0.002 V예요. 반올림 없이는 2.49 mV.'},
+ {tag:'HW1-4',ref:'문제집 3-B',title:'대각선 노출 브리지',situ:'Pd 저항 25 °C 100 Ω, 80 °C 105 Ω. 대각선 두 저항이 노출되어 +10 Ω.',
+  steps:[V(-1/21,'→ −1/21','100 ÷ 210 − 110 ÷ 210 =','100 div 210 sub 110 div 210 eq'),
+    EN(-1/21,-3,'→ −47.6 mV','ENG','eng'),
+    D(-1/22,'→ −0.04545454545 (80 °C)','105 ÷ 220 − 115 ÷ 220 를 SHIFT = 로','105 div 220 sub 115 div 220 shift eq')],
+  tip:'부호는 V₊, V₋를 어느 쪽으로 정하느냐에 따라 바뀌어요. 크기 47.6 mV, 45.5 mV를 확인하세요.'},
+ {tag:'유사',ref:'문제집 3-C',title:'숫자를 바꾼 기출 3번',situ:'Pd 4개 모두 200 Ω, V_in = 2 V, R₃만 노출, 감도 2×10⁻³ Ω/ppm, 수소 5000 ppm → ΔR = 10 Ω.',
+  steps:[V(10,'→ 10 Ω','ΔR: 5000 × 2 ×10ˣ (−)3 =','5000 mul 2 exp neg 3 eq'),
+    V(2*210/410-1,'→ 1/41','V_out: 2 × 210 ÷ 410 − 1 =','2 mul 210 div 410 sub 1 eq'),
+    D(2*210/410-1,'→ 0.0243902439 V','SHIFT = 로 다시 (또는 S⇔D)','2 mul 210 div 410 sub 1 shift eq')],
+  tip:'V_in이 2 V면 기준 중점 전압도 1 V가 돼요.'},
+ {tag:'유사',ref:'문제집 3-D',title:'온도가 바뀌면? 두 개가 노출되면?',situ:'기출 3번 브리지(100 Ω×4, V_in = 1 V, 수소 1000 ppm → +1 Ω). i) 60 °C에서 모든 저항이 104 Ω일 때  ii) 대각선 두 저항이 노출될 때.',
+  steps:[V(105/209-0.5,'→ 1/418','i) 105 ÷ 209 − 0.5 =','105 div 209 sub 0.5 eq'),
+    EN(105/209-0.5,-3,'→ 2.39 mV','ENG'),
+    V(101/201-100/201,'→ 1/201','ii) 101 ÷ 201 − 100 ÷ 201 =','101 div 201 sub 100 div 201 eq'),
+    EN(101/201-100/201,-3,'→ 4.98 mV (출력 약 2배)','ENG')],
+  tip:'대각선 두 개가 같이 변하면 출력이 거의 2배가 돼요. 브리지 감도를 높이는 배치예요.'},
+ {tag:'유사',ref:'문제집 4-B',title:'2선식·4선식',situ:'전원 2 V, 센서 500 Ω, 라인 저항 25 Ω씩. 4선식은 정전류 4 mA.',
+  steps:[V(2/550,'→ 1/275','전류: 2 ÷ (25 + 500 + 25) =','2 div lp 25 add 500 add 25 rp eq'),
+    EN(2/550,-3,'→ 3.636 mA','ENG'),
+    V(2/550*500,'→ 20/11 (1.818 V)','센서 전압: Ans × 500 =','ans mul 500 eq'),
+    V(550,'→ 550 Ω','2선식이 읽는 저항: 2 ÷ (2 ÷ 550) =','2 div lp 2 div 550 rp eq'),
+    V(10,'→ 10 %','오차: (550 − 500) ÷ 500 × 100 =','lp 550 sub 500 rp div 500 mul 100 eq'),
+    V(2,'→ 2 V','4선식 전압: 4 ×10ˣ (−)3 × 500 =','4 exp neg 3 mul 500 eq')],
+  tip:'HW2 원본(200 Ω, 10 Ω)은 10/11 제출 전이라 숫자를 바꾼 유사 문제로 연습해요.'},
+ {tag:'기출 2',ref:'문제집 5-A',title:'He 5 ppm 원자 수',situ:'1 L 용기, He 5 ppm. M = 4 g/mol, V_m = 22.4 L/mol, N_A = 6×10²³, 1 L = 10³ cm³, 센서 면적 0.01 cm².',
+  steps:[V(5e-6/22.4*4,'→ 1/1120000 (= 8.93×10⁻⁷ g)','질량: 5 ×10ˣ (−)6 ÷ 22.4 × 4 =','5 exp neg 6 div 22.4 mul 4 eq'),
+    V(5e-6/22.4*6e23,'→ 1.339285714×10¹⁷ 개','개수: Ans ÷ 4 × 6 ×10ˣ 23 =','ans div 4 mul 6 exp 23 eq'),
+    V(5e-6/22.4*6e23/1000,'→ 1.339285714×10¹⁴ 개/cm³','Ans ÷ 1000 =','ans div 1000 eq'),
+    V(Math.pow(5e-6/22.4*6e23/1000,2/3),'→ 2617673587 (≈ 2.62×10⁹ 개/cm²)','Ans x□ 2 ÷ 3 ▶ =','ans pow 2 div 3 right eq'),
+    V(Math.pow(5e-6/22.4*6e23/1000,2/3)*0.01,'→ 26176735.87 (≈ 2.62×10⁷ 개)','표면 개수: Ans × 0.01 =','ans mul 0.01 eq')],
+  tip:'교수님 답 2.61×10⁷과 끝자리 차이는 반올림 차이예요. 지수 칸의 2÷3 뒤 ▶를 꼭 눌러요.'},
+ {tag:'유사',ref:'문제집 5-C',title:'Ar 10 ppm · 2 L · 3 mm 센서',situ:'2 L 용기, Ar 10 ppm. M = 40 g/mol, V_m = 22.4 L/mol, N_A = 6×10²³. 센서 3 mm × 3 mm = 0.09 cm².',
+  steps:[V(10e-6*2/22.4,'→ 8.928571429×10⁻⁷ mol','몰: 10 ×10ˣ (−)6 × 2 ÷ 22.4 =','10 exp neg 6 mul 2 div 22.4 eq'),
+    V(10e-6*2/22.4*40,'→ 3.571428571×10⁻⁵ g','질량: Ans × 40 =','ans mul 40 eq'),
+    V(10e-6*2/22.4*6e23,'→ 5.357142857×10¹⁷ 개','개수: 10 ×10ˣ (−)6 × 2 ÷ 22.4 × 6 ×10ˣ 23 =','10 exp neg 6 mul 2 div 22.4 mul 6 exp 23 eq'),
+    V(10e-6*2/22.4*6e23/2000,'→ 2.678571429×10¹⁴ 개/cm³','Ans ÷ 2000 =','ans div 2000 eq'),
+    V(Math.pow(10e-6*2/22.4*6e23/2000,2/3),'→ 4155…  (≈ 4.16×10⁹ 개/cm²)','Ans x□ 2 ÷ 3 ▶ =','ans pow 2 div 3 right eq'),
+    V(Math.pow(10e-6*2/22.4*6e23/2000,2/3)*0.09,'→ ≈ 3.74×10⁸ 개','Ans × 0.09 =','ans mul 0.09 eq')],
+  tip:'2 L = 2000 cm³. mm² → cm²는 ÷100 (9 mm² = 0.09 cm²).'},
+ {tag:'강의 예제',ref:'문제집 5-D',title:'수소 1 ppm의 의미',situ:'H₂: M = 2.02 g/mol, V_m = 22.71 L/mol. 1 L 안의 질량.',
+  steps:[V(1e-6/22.71*2.02,'→ 8.894760018×10⁻⁸ g','1 ×10ˣ (−)6 ÷ 22.71 × 2.02 =','1 exp neg 6 div 22.71 mul 2.02 eq'),
+    V(1e-6/22.71*2.02*1e6,'→ 0.0889476… μg','μg로: Ans × 1 ×10ˣ 6 =','ans mul 1 exp 6 eq')],
+  tip:'g → μg는 ×10⁶. ENG를 눌러 88.9×10⁻⁹ g(= 88.9 ng)로 읽어도 됩니다.'},
+ {tag:'유사',ref:'문제집 6-C',title:'홀 전압 V_H',situ:'n형, n = 10²² m⁻³, I = 1 mA, B = 0.1 T, t = 1 μm, q = 1.6×10⁻¹⁹ C.',
+  formula:'R_H = 1/(nq),  V_H = R_H · I · B / t',
+  steps:[V(1/(1e22*1.6e-19),'→ 1/1600 (6.25×10⁻⁴)','R_H: 1 ÷ (1 ×10ˣ 22 × 1.6 ×10ˣ (−)19) =','1 div lp 1 exp 22 mul 1.6 exp neg 19 rp eq'),
+    V(0.0625,'→ 1/16 = 0.0625 V','Ans × 1 ×10ˣ (−)3 × 0.1 ÷ 1 ×10ˣ (−)6 =','ans mul 1 exp neg 3 mul 0.1 div 1 exp neg 6 eq')],
+  tip:'"1 ×10ˣ (−)6"은 하나의 숫자로 묶이므로 ÷ 뒤에 괄호가 없어도 10⁻⁶ 전체로 나눠요.'},
+ {tag:'유사',ref:'문제집 8-C',title:'마이크로히터 ΔT',situ:'Pt 히터 0.55 mm × 15.95 mm × 220 nm, 밀도 21,450 kg/m³, C_p = 133 J/kg·K, R = 100 Ω, V = 2 V, t = 1 ms.',
+  formula:'m = 부피 × 밀도,  ΔT = (V²/R)·t / (C_p·m)',
+  steps:[V(0.55e-3*15.95e-3*220e-9*21450,'→ 4.1397…×10⁻⁸ kg','0.55 ×10ˣ (−)3 × 15.95 ×10ˣ (−)3 × 220 ×10ˣ (−)9 × 21450 =','0.55 exp neg 3 mul 15.95 exp neg 3 mul 220 exp neg 9 mul 21450 eq'),
+    V(4/100*1e-3/(133*0.55e-3*15.95e-3*220e-9*21450),'→ 7.2650 K','2 x² ÷ 100 × 1 ×10ˣ (−)3 ÷ (133 × Ans) =','2 sq div 100 mul 1 exp neg 3 div lp 133 mul ans rp eq')],
+  tip:'÷(133 × Ans)의 괄호를 빼면 ÷133 후에 Ans를 곱해 버려요.'},
+ {tag:'기출 6',ref:'문제집 9-A',title:'가속도센서 V₀',situ:'V_s = 3 V (1 MHz), C₁ = 2C₂. 교수님 식 V₀ = −V_s + C₁/(C₁+C₂)·2V_s.',
+  steps:[V(1,'→ 1 V','(−)3 + 2 × 3 × 2 ÷ (2 + 1) =','neg 3 add 2 mul 3 mul 2 div lp 2 add 1 rp eq'),
+    V(1,'→ 1 V (정리식으로 검산)','(2 − 1) ÷ (2 + 1) × 3 =','lp 2 sub 1 rp div lp 2 add 1 rp mul 3 eq')],
+  tip:'맨 앞 −3은 (−) 키. 두 식이 같은 답이면 대입이 맞은 거예요.'},
+ {tag:'유사',ref:'문제집 9-B',title:'비율·부호를 바꾼 경우',situ:'i) C₁ = 3C₂, V_s = 2 V   ii) C₁ : C₂ = 1 : 2, V_s = 3 V. V₀ = (C₁ − C₂)/(C₁ + C₂)·V_s.',
+  steps:[V(1,'→ 1 V','i) (3 − 1) ÷ (3 + 1) × 2 =','lp 3 sub 1 rp div lp 3 add 1 rp mul 2 eq'),
+    V(-1,'→ −1 V','ii) (1 − 2) ÷ (1 + 2) × 3 =','lp 1 sub 2 rp div lp 1 add 2 rp mul 3 eq')],
+  tip:'C₁ < C₂면 V₀가 음수 → proof mass가 반대 방향으로 움직였다는 뜻이에요.'},
+ {tag:'유사',ref:'문제집 9-C',title:'변위로 C₁, C₂, V₀',situ:'C₀ = 1 pF, d = 2 μm, x = 0.2 μm, V_s = 3 V. C₁ = C₀·d/(d−x), C₂ = C₀·d/(d+x) (pF 단위로 계산).',
+  steps:[V(2/1.8,'→ 10/9 pF','C₁: 2 ÷ 1.8 =','2 div 1.8 eq'),
+    V(2/2.2,'→ 10/11 pF','C₂: 2 ÷ 2.2 =','2 div 2.2 eq'),
+    V(0.3,'→ 3/10 = 0.3 V','(2 ÷ 1.8 − 2 ÷ 2.2) ÷ (2 ÷ 1.8 + 2 ÷ 2.2) × 3 =','lp 2 div 1.8 sub 2 div 2.2 rp div lp 2 div 1.8 add 2 div 2.2 rp mul 3 eq')],
+  tip:'검산: (x/d)·V_s = 0.2 ÷ 2 × 3 = 0.3. [AI 보충] 정리식'},
+ {tag:'예상',ref:'문제집 10-A',title:'금속탐지 침투 깊이 δ',situ:'알루미늄 ρ = 2.65×10⁻⁸ Ω·m, μ₀ = 4π×10⁻⁷, f = 135 kHz. δ = 1/√(πfμσ) = √(ρ/(πfμ)).',
+  steps:[V(Math.sqrt(2.65e-8/(Math.PI*135e3*4*Math.PI*1e-7)),'→ 2.2298…×10⁻⁴ m','√□ 2.65 ×10ˣ (−)8 ÷ (π × 135 ×10ˣ 3 × 4 × π × 1 ×10ˣ (−)7) =','sqrt 2.65 exp neg 8 div lp shift exp mul 135 exp 3 mul 4 mul shift exp mul 1 exp neg 7 rp eq'),
+    V(1000*Math.sqrt(2.65e-8/(Math.PI*135e3*4*Math.PI*1e-7)),'→ 0.22298 mm','Ans × 1000 =','ans mul 1000 eq'),
+    V(Math.sqrt(2.65e-8/(Math.PI*20e3*4*Math.PI*1e-7)),'→ 5.7933…×10⁻⁴ m (주파수↓ → δ↑)','f = 20 kHz: √□ 2.65 ×10ˣ (−)8 ÷ (π × 20 ×10ˣ 3 × 4 × π × 1 ×10ˣ (−)7) =','sqrt 2.65 exp neg 8 div lp shift exp mul 20 exp 3 mul 4 mul shift exp mul 1 exp neg 7 rp eq')],
+  tip:'루트 틀 안에 분수 전체가 들어가야 해요. 다 쓴 뒤 바로 = 를 누르면 됩니다.'},
+ {tag:'예상',ref:'문제집 10-B',title:'펄스 → rpm → 차속',situ:'분당 펄스 10,000, 톱니 10개, 바퀴 반지름 0.3 m.',
+  steps:[V(1000,'→ 1000 rpm','10000 ÷ 10 =','10000 div 10 eq'),
+    V(36*Math.PI,'→ 36π','2 × π × 0.3 × 1000 ÷ 60 × 3.6 =','2 mul shift exp mul 0.3 mul 1000 div 60 mul 3.6 eq'),
+    D(36*Math.PI,'→ 113.0973355 km/h','S⇔D','sd'),
+    V(6000/48/60,'→ 25/12 (≈ 2.083 회/s)','분당 펄스 6000, 톱니 48: 6000 ÷ 48 ÷ 60 =','6000 div 48 div 60 eq')],
+  tip:'m/s → km/h는 × 3.6. π가 들어가면 36π처럼 나오니 S⇔D.'},
+ {tag:'예상',ref:'문제집 10-C',title:'노이즈 밀도 · Zero-g',situ:'감도 1 V/g, 노이즈 1 mV(RMS), 대역폭 100 Hz. +1 g 출력 1.85 V, −1 g 출력 1.45 V.',
+  steps:[V(1e-4,'→ 1/10000 = 0.1 mg/√Hz','1 ×10ˣ (−)3 ÷ 1 ÷ √□ 100 =','1 exp neg 3 div 1 div sqrt 100 eq'),
+    V(1.65,'→ 33/20 = 1.65 V (Zero-g)','(1.85 + 1.45) ÷ 2 =','lp 1.85 add 1.45 rp div 2 eq'),
+    V(0.2,'→ 1/5 = 0.2 V/g (감도)','(1.85 − 1.45) ÷ 2 =','lp 1.85 sub 1.45 rp div 2 eq')],
+  tip:'노이즈 밀도는 g 단위로 바꾼 뒤 √대역폭으로 나눠요.'},
+ {tag:'예상',ref:'문제집 10-D',title:'AMR R(θ) = R₀ + ΔR·cos²θ',situ:'R₀ = 100 Ω, ΔR = 3 Ω, θ = 45°.',
+  steps:[EV('setDeg','화면 위 D 표시','SHIFT MODE → 3(Deg)','shift mode 3'),
+    V(101.5,'→ 203/2 = 101.5 Ω','100 + 3 × cos 45 ) x² =','100 add 3 mul cos 45 rp sq eq')],
+  tip:'cos 45 다음 ) 로 괄호를 닫아야 x²가 cos 값 전체에 걸려요. ) 를 빼면 45²의 cos이 됩니다.'}
+]};
+
+/* ================= 실전 목표값 · 사고 복구 · 모의시험 ================= */
+const HE=5e-6/22.4, AR=10e-6*2/22.4;
+const GOALS={
+ stat:[
+  [['A (절편)',-10.5],['B (기울기 = 감도)',5.5],['출력 30일 때 읽은 입력 xₘ',40.5/5.5],['오차율 %',(40.5/5.5-7)/7*100],['정확도 %',100-(40.5/5.5-7)/7*100]],
+  [['r',126/Math.sqrt(24*666)],['R²',1-1.5/222],['출력 30일 때 읽은 입력 xₘ',32.5/5.25],['오차율 %',(32.5/5.25-6)/6*100]],
+  [['B (감도)',1.94],['A (절편)',0.15],['MDL = 3σ/S',0.15/1.94]],
+  [['Σx²',155],['Σx',21],['Σxy',632],['det = NΣx² − (Σx)²',24]]],
+ exam:[
+  [['a',5.5],['b',-10.5],['xₘ',40.5/5.5],['오차율 %',(40.5/5.5-7)/7*100]],
+  [['a',3.25],['b',0],['R²',1-1.5/86],['xₘ',12/3.25],['오차율 %',(4-12/3.25)/4*100]],
+  [['|Z_L| (Ω)',Math.sqrt(2600)],['L (H)',10/(2*Math.PI*1e9)]],
+  [['|Z_L| (Ω)',Math.sqrt(1125)],['C (F)',1/(2*Math.PI*2e9*15)]],
+  [['L (H)',25/(2*Math.PI*5e8)]],
+  [['ΔR (Ω)',1],['V_out (V)',101/201-0.5,true]],
+  [['V_o 25 °C (V)',-1/21,true],['V_o 80 °C (V)',-1/22,true]],
+  [['ΔR (Ω)',10],['V_out (V)',2*210/410-1,true]],
+  [['i) 60 °C V_out (V)',105/209-0.5,true],['ii) 대각선 V_out (V)',1/201,true]],
+  [['전류 I (A)',2/550],['센서 전압 (V)',2/550*500],['2선식이 읽는 R (Ω)',550],['오차 %',10],['4선식 전압 (V)',2]],
+  [['He 질량 (g)',HE*4],['원자 개수',HE*6e23],['개/cm³',HE*6e23/1000],['개/cm²',Math.pow(HE*6e23/1000,2/3)],['표면 원자 수',Math.pow(HE*6e23/1000,2/3)*0.01]],
+  [['몰 (mol)',AR],['질량 (g)',AR*40],['원자 개수',AR*6e23],['개/cm³',AR*6e23/2000],['개/cm²',Math.pow(AR*6e23/2000,2/3)],['표면 원자 수',Math.pow(AR*6e23/2000,2/3)*0.09]],
+  [['H₂ 1 ppm 질량 (g/L)',1e-6/22.71*2.02],['μg 단위',1e-6/22.71*2.02*1e6]],
+  [['R_H',1/1.6e3],['V_H (V)',0.0625]],
+  [['히터 질량 (kg)',0.55e-3*15.95e-3*220e-9*21450],['ΔT (K)',4/100*1e-3/(133*0.55e-3*15.95e-3*220e-9*21450)]],
+  [['V₀ (V)',1]],
+  [['i) V₀ (V)',1],['ii) V₀ (V)',-1]],
+  [['C₁ (pF)',2/1.8],['C₂ (pF)',2/2.2],['V₀ (V)',0.3]],
+  [['δ 135 kHz (m)',Math.sqrt(2.65e-8/(Math.PI*135e3*4*Math.PI*1e-7))],['δ (mm)',1000*Math.sqrt(2.65e-8/(Math.PI*135e3*4*Math.PI*1e-7))],['δ 20 kHz (m)',Math.sqrt(2.65e-8/(Math.PI*20e3*4*Math.PI*1e-7))]],
+  [['rpm',1000],['차속 (km/h)',36*Math.PI],['톱니 48, 펄스 6000/min → 회/s',6000/48/60]],
+  [['노이즈 밀도 (g/√Hz)',1e-4],['Zero-g 출력 (V)',1.65],['감도 (V/g)',0.2]],
+  [['R(45°) (Ω)',101.5]]]
+};
+function silent(keys){ K(keys).split(' ').forEach(id=>handle(id)); }
+LESSONS.trouble=[
+ {tag:'사고 1',title:'cos 답이 이상해요',situ:'AMR 문제 R(45°) = 100 + 3·cos²45°를 눌렀더니 101.5가 아니라 100.83이 나왔어요. 원인을 찾아 고치고 101.5를 다시 구하세요.',
+  setup(){ S.setup.angle='Rad'; silent('100 add 3 mul cos 45 rp sq eq'); },
+  steps:[{t:'원인을 고치고 다시 계산',keys:K('shift mode 3 100 add 3 mul cos 45 rp sq eq'),expect:'→ 203/2 (101.5)',check:{type:'value',v:101.5}}],
+  cause:'각도 단위가 Rad였어요. 화면 위 표시가 D가 아니라 R이었죠. SHIFT MODE 3(Deg)로 바꾸면 돼요.',tip:'시험 시작하자마자 화면 위 D를 확인하는 습관을 들이세요.'},
+ {tag:'사고 2',title:'회귀 B가 숙제 답과 달라요',situ:'기출 1번 데이터 (5,16), (7,30), (9,38)로 SHIFT 1 5 2를 눌렀는데 B = 5.25가 나왔어요. 5.5가 나와야 해요.',
+  setup(){ S.calcMode='STAT'; S.stat={x:[4,6,8],y:[18,30,39],row:0,col:0,typ:''}; silent('shift 1 5 2 eq'); },
+  steps:[{t:'원인을 고치고 B 다시 구하기',keys:K('mode 3 2 5 eq 7 eq 9 eq right up up up 16 eq 30 eq 38 eq ac shift 1 5 2 eq'),expect:'→ B = 5.5',check:{type:'value',v:5.5}}],
+  cause:'표에 이전 문제(HW1) 데이터가 남아 있었어요. SHIFT 1 2(Data)로 표를 확인하거나, MODE 3 2로 표를 새로 열면 지워져요.',tip:'회귀값이 이상하면 제일 먼저 표를 확인하세요.'},
+ {tag:'사고 3',title:'답이 0.00으로 나와요',situ:'기출 3번 V_out = 101 ÷ 201 − 0.5 를 소수로 보려고 SHIFT = 를 눌렀더니 0.00만 보여요. 유효숫자가 보이게 고치세요.',
+  setup(){ S.setup.disp='Fix'; S.setup.dn=2; silent('101 div 201 sub 0.5 shift eq'); },
+  steps:[{t:'표시 형식을 고치고 다시 계산',keys:K('shift mode 8 1 101 div 201 sub 0.5 shift eq'),expect:'→ 2.487562189×10⁻³',check:{type:'fn',f:()=>S.mode==='result'&&approx(S.result.v,101/201-0.5)&&S.setup.disp==='Norm'&&S.result.forms[S.result.fi]==='dec'}}],
+  cause:'표시 형식이 Fix 2(소수 둘째 자리 고정)였어요. 화면 위 FIX 표시. SHIFT MODE 8(Norm) 1로 돌려요.',tip:'초기화(SHIFT 9 3 = AC)로도 한 번에 Norm1이 됩니다.'},
+ {tag:'사고 4',title:'답에 루트가 붙어 나와요',situ:'HW1-3 |Z_L| = √(50² + 10²)가 10√26으로 나왔어요. 답안에는 소수(Ω)로 써야 해요.',
+  setup(){ silent('sqrt 50 sq add 10 sq eq'); },
+  steps:[{t:'소수로 바꾸기',keys:K('sd'),expect:'→ 50.99019514',check:{type:'decimal',v:Math.sqrt(2600)}}],
+  cause:'고장이 아니라 Math 모드가 정확한 꼴(√, π, 분수)로 먼저 보여 주는 거예요. S⇔D를 누르거나 처음부터 SHIFT = 로 끝내요.',tip:'36π, 1/402, 10√26 모두 S⇔D 한 번이면 소수가 됩니다.'},
+ {tag:'사고 5',title:'Syntax ERROR가 떠요',situ:'4.7×10⁻⁶ × 2.2×10³을 입력했더니 Syntax ERROR가 났어요. 0.01034가 나오게 고치세요.',
+  setup(){ silent('4.7 exp sub 6 mul 2.2 exp 3 eq'); },
+  steps:[{t:'원인을 고치고 다시 계산',keys:K('ac 4.7 exp neg 6 mul 2.2 exp 3 eq'),expect:'→ 517/50000 (0.01034)',check:{type:'value',v:0.01034}}],
+  cause:'지수 자리의 마이너스를 빼기 키 −로 눌렀어요. 음수 부호는 (−) 키입니다. ◀나 ▶를 누르면 틀린 위치로 커서가 가서 DEL로 고칠 수도 있어요.',tip:'(−)는 계산기 왼쪽 중간, 빼기 −는 오른쪽 아래.'},
+ {tag:'사고 6',title:'2¹² ÷ 4가 8이 나와요',situ:'2¹² ÷ 4 = 1024를 기대했는데 8이 나왔어요.',
+  setup(){ silent('2 pow 12 div 4 eq'); },
+  steps:[{t:'원인을 고치고 다시 계산',keys:K('ac 2 pow 12 right div 4 eq'),expect:'→ 1024',check:{type:'value',v:1024}}],
+  cause:'x□ 지수 칸에서 ▶로 나오지 않아 ÷4까지 지수 안에 들어갔어요(2^(12÷4) = 8).',tip:'He 문제의 x□ 2÷3 뒤에도 ▶. 화면에서 지수가 어디까지 작은 글씨인지 확인하세요.'},
+ {tag:'사고 7',title:'L이 10⁹ 단위로 나와요',situ:'HW1-3에서 L = 10 ÷ (2π × 10⁹)을 계산했는데 1.59×10⁹ H가 나왔어요. 1.59 nH가 나와야 해요.',
+  setup(){ silent('10 div 2 shift exp mul 1 exp 9 eq'); },
+  steps:[{t:'원인을 고치고 다시 계산',keys:K('ac 10 div lp 2 shift exp mul 1 exp 9 rp eq'),expect:'→ 1.591549431×10⁻⁹',check:{type:'value',v:10/(2*Math.PI*1e9)}}],
+  cause:'분모를 괄호로 묶지 않았어요. 10÷2π까지만 나누고 ×10⁹를 곱해 버렸어요.',tip:'나누는 쪽이 곱셈이면 항상 ( ) 로 감싸세요.'}
+];
+const MOCK_SET=[['stat',0],['exam',0],['exam',2],['exam',5],['exam',10],['exam',13],['exam',14],['exam',15]];
+const MOCK_LIMIT=25*60;
+
+const G = {tab:'basic', li:0, si:0, gpos:0, start:0, mode:'follow', reveal:false, lv:{}, P:null, M:null, wasErr:false};
+try{ G.lv=JSON.parse(localStorage.getItem('es-lv')||'{}')||{}; }catch(e){}
+function saveLv(){ try{ localStorage.setItem('es-lv',JSON.stringify(G.lv)); }catch(e){} }
+const lvOf=(tab,i)=>G.lv[tab+i]||0;
+const maxLv=tab=>tab==='basic'?2:tab==='trouble'?1:3;
+const lesson=()=>LESSONS[G.tab][G.li];
+const guiding=()=>G.mode==='follow'||(G.mode==='trouble'&&G.reveal);
+const stepKeys=()=>{ if(G.tab==='mock'||G.mode==='real') return []; const st=lesson().steps[G.si]; return st?st.keys.split(' '):[]; };
+const mmss=sec=>`${Math.floor(sec/60)}:${String(Math.floor(sec%60)).padStart(2,'0')}`;
+function valText(v){ if(v===0) return '0'; const a=Math.abs(v); if(a>=1e-3&&a<1e7) return String(Number(v.toPrecision(6))).replace('-','−'); const [m,e]=v.toExponential(4).split('e'); return `${m.replace('-','−')}×10^${Number(e)}`.replace('^-','^−'); }
+
+function arrEq(a,b){ return a.length===b.length && a.every((v,i)=>approx(v,b[i])); }
+function approx(a,b){ return typeof a==='number' && Math.abs(a-b)<=1e-8*Math.max(Math.abs(b),1e-300) + (b===0?1e-12:0); }
+function passed(c){
+  const r=S.result, ok=S.mode==='result'&&r;
+  switch(c.type){
+    case 'value': return ok && (c.tol? Math.abs(r.v-c.v)<=c.tol : approx(r.v,c.v)) && (!c.ans||S.lastStartAns);
+    case 'statx': return arrEq(S.stat.x,c.x);
+    case 'staty': return arrEq(S.stat.x.length===c.y.length?S.stat.y:[],c.y);
+    case 'decimal': return ok && approx(r.v,c.v) && r.forms[r.fi]==='dec' && r.eng==null;
+    case 'eng': return ok && approx(r.v,c.v) && r.eng===c.exp;
+    case 'event': return S.lastEvent===c.ev;
+    case 'stored': return S.lastEvent==='sto' && approx(S.vars[c.var],c.v);
+    case 'fn': return !!c.f();
+  }
+  return false;
+}
+function goalHit(v,g){
+  if(g.v===0) return Math.abs(v)<1e-9;
+  const tol=2e-3*Math.abs(g.v);
+  return Math.abs(v-g.v)<=tol || (g.abs && Math.abs(Math.abs(v)-Math.abs(g.v))<=tol);
+}
+function newPractice(tab,li){ return {goals:GOALS[tab][li].map(([q,v,abs])=>({q,v,abs,found:null})), t0:Date.now(), errs:0, end:null}; }
+function scanGoals(P){
+  if(S.mode==='error' && !G.wasErr) P.errs++;
+  G.wasErr = S.mode==='error';
+  if(S.mode!=='result'||!S.result) return false;
+  let hit=false;
+  for(const g of P.goals){ if(!g.found && goalHit(S.result.v,g)){ g.found=valText(S.result.v); hit=true; break; } }
+  return hit;
+}
+function banner(msg,kind){ const b=document.getElementById('banner'); if(b){ b.innerHTML=msg; b.className='banner show '+kind; } const m=document.getElementById('miniMsg'); if(m){ m.innerHTML=msg.replace(/<button[^>]*>(.*?)<\/button>/,'「$1」'); m.className='mm '+kind; m.hidden=false; } }
+function setLv(n){ const k=G.tab+G.li; if((G.lv[k]||0)<n){ G.lv[k]=n; saveLv(); renderList(); } }
+
+function checkLesson(){
+  if(G.tab==='mock') return mockCheck();
+  if(S.keyCount<=G.start) return;
+  if(G.mode==='real'){
+    const P=G.P; if(P.end) return;
+    if(scanGoals(P)){
+      renderGoals(P);
+      if(P.goals.every(g=>g.found)){
+        P.end=Date.now(); setLv(3); renderPanel();
+        banner(`실전 통과 · ${mmss((P.end-P.t0)/1000)} · ERROR ${P.errs}회. 이 문제는 손에 익었어요.`,'good');
+      } else banner('맞았어요. 남은 값을 계속 구하세요.','good');
+    } else if(S.mode==='error') banner(`${S.err}. AC로 지우고 다시 입력하세요.`,'warn');
+    return;
+  }
+  const L=lesson(); if(G.si>=L.steps.length) return;
+  if(passed(L.steps[G.si].check)){
+    G.si++; G.gpos=0; G.start=S.keyCount;
+    if(G.si>=L.steps.length){
+      if(G.mode==='trouble'){ setLv(1); G.reveal=true; renderPanel(); banner(`해결했어요. <b>원인</b> ${L.cause}`,'good'); }
+      else {
+        setLv(G.mode==='follow'?1:2); renderPanel();
+        const nextMode = G.mode==='follow' ? 'hint' : (maxLv(G.tab)>=3 ? 'real' : null);
+        banner(nextMode ? `완료했어요. 이번엔 <button class="btn primary" id="goNext">${nextMode==='hint'?'힌트만으로 다시':'실전으로 다시'}</button> 풀어 보세요.` : '완료했어요. 다음 문제로 넘어가세요.','good');
+        const gn=document.getElementById('goNext'); if(gn) gn.onclick=()=>startLesson(G.tab,G.li,nextMode);
+      }
+    } else { renderPanel(); banner('맞았어요. 다음 단계로 넘어갑니다.','good'); }
+    paintGuide();
+  } else if(S.mode==='error' && G.mode!=='trouble'){
+    banner(`${S.err}가 났어요. AC를 누르고 다시 입력하거나 [처음부터]를 누르세요.`,'warn');
+  }
+}
+function guideStep(id){
+  if(!guiding()) return;
+  const ks=stepKeys(); if(!ks.length) return;
+  if(ks[G.gpos]===id){ G.gpos++; }
+  else if(G.gpos<ks.length){ toast('안내와 다른 키예요. 계산기는 그대로 동작합니다. 꼬였으면 [처음부터]를 누르세요.',true); }
+}
+function chipHTML(ks,pos){
+  let h='';
+  ks.forEach((k,i)=>{
+    const prev=ks[i-1]; const d=KEYDEF[k]||{m:k};
+    let cls='chip', inner=`<span>${d.m}</span>`;
+    if(k==='shift') cls+=' sh'; else if(k==='alpha') cls+=' al';
+    if(prev==='shift' && d.s){ cls+=' sub-sh'; inner=`<span>${d.m}</span><small>${d.s}</small>`; }
+    if(prev==='alpha' && d.a){ cls+=' sub-al'; inner=`<span>${d.m}</span><small>${d.a}</small>`; }
+    if(pos!=null && i<pos) cls+=' ok'; if(pos!=null && i===pos) cls+=' nx';
+    h+=`<span class="${cls}">${inner}</span>`;
+  });
+  return h;
+}
+function paintGuide(){
+  document.querySelectorAll('.next').forEach(b=>b.classList.remove('next'));
+  const cur=document.getElementById('curChips');
+  const ks=stepKeys();
+  if(cur) cur.innerHTML = guiding()? chipHTML(ks,G.gpos) : '';
+  const mc=document.getElementById('miniChips'); if(mc) mc.innerHTML = guiding()? chipHTML(ks,G.gpos) : '';
+  if(!guiding()||!ks.length||G.gpos>=ks.length) return;
+  document.querySelectorAll(`[data-k="${ks[G.gpos]}"]`).forEach(b=>b.classList.add('next'));
+}
+function resetCalc(){ S.calcMode='COMP'; S.stat={x:[],y:[],row:0,col:0,typ:''}; S.setup={io:'Math',out:'Math',angle:'Deg',disp:'Norm',dn:1}; S.mode='edit'; S.tokens=[]; S.cur=0; S.result=null; S.menu=null; S.pending=null; S.override=null; S.shift=false; S.alpha=false; S.err=null; }
+function startLesson(tab,li,mode){
+  G.tab=tab; G.li=li; G.si=0; G.gpos=0; G.start=S.keyCount; G.reveal=false; G.wasErr=false;
+  resetCalc();
+  if(tab==='mock'){ G.mode='mock'; render(); renderPanel(); renderList(); return; }
+  const lv=lvOf(tab,li);
+  if(tab==='trouble') G.mode='trouble';
+  else G.mode = mode || (maxLv(tab)>=3 && lv>=2 ? 'real' : lv>=1 ? 'hint' : 'follow');
+  if(G.mode==='real') G.P=newPractice(tab,li);
+  const L=LESSONS[tab][li]; if(L.setup) L.setup();
+  render(); renderPanel(); renderList();
+  toast(tab==='trouble'?'계산기가 문제 상황 그대로 멈춰 있어요. 화면부터 살펴보세요.':'계산기를 비우고 COMP 모드로 시작해요.');
+}
+const TABNAME={basic:'기본 조작',stat:'STAT 회귀',exam:'기출·숙제 계산',trouble:'사고 복구',mock:'모의시험'};
+function modeBar(){
+  if(G.tab==='trouble') return '';
+  const modes=[['follow','따라하기'],['hint','힌트만']].concat(maxLv(G.tab)>=3?[['real','실전']]:[]);
+  return `<div class="modes" role="group" aria-label="연습 방식">${modes.map(([m,l],i)=>`<button class="mode ${G.mode===m?'on':''}" data-mode="${m}" aria-pressed="${G.mode===m}"><span>${i+1}</span>${l}${lvOf(G.tab,G.li)>i?' ✓':''}</button>`).join('')}</div>`;
+}
+function goalsHTML(P){
+  return `<ul class="goals" id="goals">${P.goals.map(g=>`<li class="${g.found?'got':''}"><span class="gk">${g.found?'✓':'○'}</span><span class="gq">${g.q}</span><span class="gv">${g.found||''}</span></li>`).join('')}</ul>`;
+}
+function renderGoals(P){ const el=document.getElementById('goals'); if(el) el.outerHTML=goalsHTML(P); renderMini(); const c=document.getElementById('gcount'); if(c) c.textContent=P.goals.filter(g=>g.found).length; }
+function renderPanel(){
+  if(G.tab==='mock') return renderMock();
+  const L=lesson();
+  const all=LESSONS[G.tab]; const hasNext=G.li<all.length-1;
+  let body='';
+  if(G.mode==='real'){
+    const P=G.P, found=P.goals.filter(g=>g.found).length;
+    body=`<div class="realhead"><span>구할 값 <b id="gcount">${found}</b> / ${P.goals.length}</span><span class="timer" data-t0="${P.t0}" ${P.end?`data-end="${P.end}"`:''}>${mmss(((P.end||Date.now())-P.t0)/1000)}</span></div>
+      ${goalsHTML(P)}
+      ${L.formula?`<details class="fdet"><summary>공식 보기</summary><div class="formula">${L.formula}</div></details>`:''}`;
+  } else {
+    const steps=L.steps.map((st,i)=>{
+      const state = i<G.si?'done':i===G.si?'cur':'todo';
+      const showKeys = G.mode==='follow' || (G.mode==='trouble'&&G.reveal) || i<G.si;
+      const chips = i===G.si ? `<div class="chips" id="curChips"></div>` : (showKeys ? `<div class="chips">${chipHTML(st.keys.split(' '),null)}</div>`:'');
+      return `<li class="step ${state}"><div class="head"><span class="num">${i<G.si?'✓':i+1}</span><div class="txt"><div>${st.t}</div><div class="expect">${st.expect}</div></div></div>${chips}</li>`;
+    }).join('');
+    body=`${L.formula&&G.mode==='follow'?`<div class="formula">${L.formula}</div>`:''}
+      <div class="prog">단계 ${Math.min(G.si+1,L.steps.length)} / ${L.steps.length}${G.si>=L.steps.length?' · 완료':''}</div>
+      <ol class="steps">${steps}</ol>`;
+  }
+  const trouble = G.mode==='trouble' ? `<div class="ctrls"><button class="btn" id="showCause">원인 보기</button><button class="btn" id="showKeys">키 순서 보기</button></div><div class="cause" id="cause" hidden><b>원인</b> ${L.cause}</div>` : '';
+  document.getElementById('stepCard').innerHTML = `
+    <div class="eyebrow">${TABNAME[G.tab]} · ${L.tag}${L.ref?' · '+L.ref:''}</div>
+    <h2>${L.title}</h2>
+    ${modeBar()}
+    <p class="situ">${G.mode==='trouble'?'<b>증상</b> ':''}${L.situ}</p>
+    ${body}
+    ${trouble}
+    <div class="banner" id="banner"></div>
+    <div class="tip"><b>포인트</b> ${L.tip}</div>
+    <div class="ctrls">
+      <button class="btn" id="restart">처음부터</button>
+      ${G.mode==='real'&&!G.P.end?'<button class="btn" id="stuck">막혔어요 → 힌트만으로</button>':''}
+      ${hasNext?'<button class="btn primary" id="nextL">다음 문제</button>':''}
+    </div>`;
+  document.getElementById('restart').onclick=()=>startLesson(G.tab,G.li,G.mode==='trouble'?undefined:G.mode);
+  const n=document.getElementById('nextL'); if(n) n.onclick=()=>startLesson(G.tab,G.li+1);
+  const st=document.getElementById('stuck'); if(st) st.onclick=()=>{ const k=G.tab+G.li; G.lv[k]=Math.min(G.lv[k]||0,1); saveLv(); startLesson(G.tab,G.li,'hint'); };
+  document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>startLesson(G.tab,G.li,b.dataset.mode));
+  const sc=document.getElementById('showCause'); if(sc) sc.onclick=()=>{ document.getElementById('cause').hidden=false; };
+  const sk=document.getElementById('showKeys'); if(sk) sk.onclick=()=>{ G.reveal=true; renderPanel(); };
+  renderMini();
+  const cs=document.querySelector('.step.cur'); if(cs && window.innerWidth>760){ const r=cs.getBoundingClientRect(); if(r.bottom>window.innerHeight||r.top<0) cs.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  paintGuide();
+}
+
+/* ---- 모의시험 ---- */
+function mockCheck(){
+  const M=G.M; if(!M||M.done) return;
+  const P=M.per[M.i]; if(P.end) return;
+  if(scanGoals(P)){
+    renderGoals(P);
+    if(P.goals.every(g=>g.found)){ P.end=Date.now(); renderMock(); banner('이 문제는 다 구했어요. [다음 문제]로 넘어가세요.','good'); }
+  }
+}
+function mockStart(){
+  G.M={i:0, t0:Date.now(), done:false, per:MOCK_SET.map(([t,i])=>({tab:t,li:i,...newPractice(t,i),t0:null}))};
+  G.M.per[0].t0=Date.now(); resetCalc(); render(); renderMock();
+}
+function mockNext(){
+  const M=G.M, P=M.per[M.i]; P.end=P.end||Date.now(); P.spent=(P.end-P.t0)/1000;
+  if(M.i>=M.per.length-1 || (Date.now()-M.t0)/1000>=MOCK_LIMIT) return mockFinish();
+  M.i++; M.per[M.i].t0=Date.now(); G.wasErr=false; resetCalc(); render(); renderMock();
+}
+function mockFinish(){
+  const M=G.M; M.done=true; M.total=(Date.now()-M.t0)/1000;
+  M.per.forEach(P=>{ if(P.t0 && P.spent==null) P.spent=((P.end||Date.now())-P.t0)/1000; });
+  renderMock();
+}
+function renderMock(){
+  setTimeout(renderMini,0);
+  const card=document.getElementById('stepCard'), M=G.M;
+  const head=`<div class="eyebrow">모의시험 · 계산 ${MOCK_SET.length}문제 · 제한 ${MOCK_LIMIT/60}분</div>`;
+  if(!M){
+    card.innerHTML=`${head}<h2>시험장처럼 연속으로 풀기</h2>
+      <p class="situ">키 안내 없이 문제만 보고 계산기로 값을 구해요. 맞는 값이 화면에 나오면 자동으로 체크돼요. 끝나면 문제마다 걸린 시간과 ERROR 횟수를 보여 줍니다.</p>
+      <ol class="mocklist">${MOCK_SET.map(([t,i])=>`<li>${LESSONS[t][i].title} <span class="muted">${LESSONS[t][i].tag}</span></li>`).join('')}</ol>
+      <div class="ctrls"><button class="btn primary" id="mstart">시작</button></div>`;
+    document.getElementById('mstart').onclick=mockStart; return;
+  }
+  if(M.done){
+    const rows=M.per.map((P,k)=>{ const f=P.goals.filter(g=>g.found).length, n=P.goals.length; const L=LESSONS[P.tab][P.li];
+      return `<tr class="${f===n?'':'miss'}"><td>${k+1}. ${L.title}</td><td>${f} / ${n}</td><td>${P.spent!=null?mmss(P.spent):'—'}</td><td>${P.errs}</td><td>${f===n?'':`<button class="btn sm" data-go="${P.tab},${P.li}">힌트로 복습</button>`}</td></tr>`; }).join('');
+    const got=M.per.reduce((a,P)=>a+P.goals.filter(g=>g.found).length,0), all=M.per.reduce((a,P)=>a+P.goals.length,0);
+    card.innerHTML=`${head}<h2>결과 · ${got} / ${all}개 값 · ${mmss(M.total)}</h2>
+      <div class="tw"><table class="rep"><thead><tr><th>문제</th><th>구한 값</th><th>시간</th><th>ERROR</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="fine">빨간 줄은 다 못 구한 문제예요. [힌트로 복습]을 누르면 그 문제를 힌트만 모드로 다시 풀어요. ERROR가 많은 문제는 사고 복구 탭의 5·6·7번을 함께 보세요.</p>
+      <div class="ctrls"><button class="btn primary" id="mre">다시 응시</button></div>`;
+    document.getElementById('mre').onclick=mockStart;
+    card.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ const [t,i]=b.dataset.go.split(','); startLesson(t,+i,'hint'); });
+    return;
+  }
+  const P=M.per[M.i], L=LESSONS[P.tab][P.li];
+  card.innerHTML=`${head}
+    <div class="realhead"><span>문제 ${M.i+1} / ${M.per.length} · ${L.tag}</span><span class="timer" data-left="${M.t0}">${mmss(Math.max(0,MOCK_LIMIT-(Date.now()-M.t0)/1000))}</span></div>
+    <h2>${L.title}</h2>
+    <p class="situ">${L.situ}</p>
+    ${goalsHTML(P)}
+    <div class="banner" id="banner"></div>
+    <div class="ctrls"><button class="btn primary" id="mnext">${M.i<M.per.length-1?'다음 문제':'제출'}</button><button class="btn" id="mend">그만하고 결과 보기</button></div>`;
+  document.getElementById('mnext').onclick=mockNext;
+  document.getElementById('mend').onclick=()=>{ const Q=M.per[M.i]; Q.end=Q.end||Date.now(); Q.spent=(Q.end-Q.t0)/1000; mockFinish(); };
+}
+function renderMini(){
+  const el=document.getElementById('mini'); if(!el) return;
+  const more='<a href="#stepCard">자세히 ↓</a>';
+  let h='', t='', e='', chips='';
+  if(G.tab==='mock'){
+    const M=G.M;
+    if(!M||M.done){ h=`<span>모의시험</span>${more}`; t=M?'결과는 아래에서 확인하세요.':'아래 [시작]을 누르면 시작해요.'; }
+    else { const P=M.per[M.i], L=LESSONS[P.tab][P.li], f=P.goals.filter(g=>g.found).length, nx=P.goals.find(g=>!g.found);
+      h=`<span>문제 ${M.i+1}/${M.per.length} · 구한 값 ${f}/${P.goals.length} · <span class="timer" data-left="${M.t0}">${mmss(Math.max(0,MOCK_LIMIT-(Date.now()-M.t0)/1000))}</span></span>${more}`;
+      t=L.title; e=nx?`다음: ${nx.q}`:'다 구했어요 → 아래 [다음 문제]'; }
+  } else {
+    const L=lesson();
+    if(G.mode==='real'){ const P=G.P, f=P.goals.filter(g=>g.found).length, nx=P.goals.find(g=>!g.found);
+      h=`<span>실전 · 구한 값 ${f}/${P.goals.length}</span>${more}`; t=L.title; e=nx?`다음: ${nx.q}`:'모두 구했어요'; }
+    else if(G.si>=L.steps.length){ h=`<span>${L.title} · 완료</span>${more}`; t='아래에서 다음 단계나 다음 문제를 고르세요.'; }
+    else { const st=L.steps[G.si];
+      h=`<span>${G.mode==='trouble'?'사고 복구':G.mode==='hint'?'힌트만':'따라하기'} · 단계 ${G.si+1}/${L.steps.length}</span>${more}`;
+      t=G.mode==='trouble'&&!G.reveal? `<b>증상</b> ${L.title}` : st.t; e=st.expect;
+      chips=guiding()?'<div class="chips" id="miniChips"></div>':''; }
+  }
+  el.innerHTML=`<div class="mh">${h}</div><div class="mt">${t}</div>${e?`<div class="me">${e}</div>`:''}${chips}<div class="mm" id="miniMsg" hidden></div>`;
+  const mc=document.getElementById('miniChips'); if(mc){ mc.innerHTML=chipHTML(stepKeys(),G.gpos); }
+}
+setInterval(()=>{
+  document.querySelectorAll('.timer').forEach(t=>{
+    if(t.dataset.left){ const left=MOCK_LIMIT-(Date.now()-Number(t.dataset.left))/1000; t.textContent=mmss(Math.max(0,left)); t.classList.toggle('low',left<180); if(left<=0 && G.M && !G.M.done) mockFinish(); }
+    else if(!t.dataset.end) t.textContent=mmss((Date.now()-Number(t.dataset.t0))/1000);
+  });
+},1000);
+
+function renderList(){
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===G.tab)));
+  const box=document.getElementById('lessons');
+  if(G.tab==='mock'){ box.innerHTML='<p class="fine" style="margin:0">기출·숙제 계산 8문제를 시간 제한을 두고 연속으로 풉니다. 시험 2~3일 전에 한 번, 전날 한 번 추천해요.</p>'; return; }
+  const mx=maxLv(G.tab);
+  box.innerHTML = LESSONS[G.tab].map((l,i)=>{ const v=lvOf(G.tab,i);
+    const dots = G.tab==='trouble' ? (v?'✓':'') : '●'.repeat(Math.min(v,mx))+'○'.repeat(Math.max(0,mx-v));
+    return `<button class="lesson ${i===G.li?'active':''} ${v>=mx?'fin':''}" data-i="${i}"><span class="tag">${l.tag}</span><span class="lt">${l.title}</span><span class="dots" aria-label="진도 ${v}/${mx}">${dots}</span></button>`; }).join('');
+  document.querySelectorAll('.lesson').forEach(b=>b.onclick=()=>startLesson(G.tab,+b.dataset.i));
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>startLesson(t.dataset.tab,0));
+
+/* 키보드 */
+document.addEventListener('keydown',e=>{
+  if(e.target.closest && e.target.closest('input')) return;
+  const m={'Enter':'eq','=':'eq','Backspace':'del','Escape':'ac','+':'add','-':'sub','*':'mul','/':'div','(':'lp',')':'rp','.':'dot','^':'pow','ArrowLeft':'left','ArrowRight':'right','ArrowUp':'up','ArrowDown':'down'};
+  let k = /^[0-9]$/.test(e.key) ? e.key : m[e.key];
+  if(!k) return;
+  e.preventDefault(); press(k);
+});
+
+buildKeys(); startLesson('basic',0);
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+</script>
+
+</body>
+</html>
